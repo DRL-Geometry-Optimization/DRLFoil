@@ -16,7 +16,7 @@ pedro.kulfan(
 )
 """
 
-pedro.random_kulfan(20)
+pedro.random_kulfan2(n_params=30,variation= 0.4, extra_weight = 0.5, intra_weight= 0.3)
 
 pedro.airfoil_plot()
 
