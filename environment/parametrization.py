@@ -177,7 +177,8 @@ if __name__ == "__main__": #This will only run if the script is run directly, no
     print(pedro.airfoil.upper_weights)
     print(pedro.airfoil.lower_weights)
 
-    pedro.modify_airfoil(np.full(15, -0.1), np.full(15, 0.1), 0.1)
+    pedro.modify_airfoil(np.full(15, 0.3), np.full(15, -0.1), 0.1)
+    
     pedro.analysis()
     pedro.airfoil_plot()
 
