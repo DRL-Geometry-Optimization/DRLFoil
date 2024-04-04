@@ -1,5 +1,3 @@
-from parametrization import airfoiltools
-
 def reward(efficiency, last_efficiency = None, cl = None, cd = None, delta_reward = True, cl_target = False, cd_target = False):
 
     if delta_reward == True:
