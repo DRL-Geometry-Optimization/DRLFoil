@@ -98,8 +98,8 @@ class airfoiltools:
     # Modify the airfoil by changing the weights of the parameters.
     # The weights are added to the existing weights of the airfoil!
     def modify_airfoil(self, action, TE_thickness = 0, name = ""):
-        self.airfoil.upper_weights = self.airfoil.upper_weights + action[0]
-        self.airfoil.lower_weights = self.airfoil.lower_weights + action[1]
+        self.airfoil.upper_weights = self.airfoil.upper_weights + action[1]
+        self.airfoil.lower_weights = self.airfoil.lower_weights + action[0]
         self.airfoil.leading_edge_weight = self.airfoil.leading_edge_weight + action[2]
         self.airfoil.TE_thickness = self.airfoil.TE_thickness + TE_thickness
         self.airfoil.name = name # Change the name of the airfoil if needed

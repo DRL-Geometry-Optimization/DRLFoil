@@ -5,7 +5,7 @@ from gymnasium import spaces
 from parametrization import airfoiltools
 from reward import reward
 
-
+# Tutorial: https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 
 
 class AirfoilEnv(gym.Env):
@@ -14,8 +14,6 @@ class AirfoilEnv(gym.Env):
     def __init__(self, state0, max_iter=300, efficiency_th=None):
 
         # state0 should have the following structure: [[downparameters],[upparameters],LE_weight]
-
-        super(AirfoilEnv, self).__init__() # Initialize the parent class 
 
         if len(state0) == 3:
             pass
@@ -34,6 +32,8 @@ class AirfoilEnv(gym.Env):
         self.step_counter = 0
         self.reward = 0
 
+        self.last_efficiency = None # Placeholder for the last efficiency value
+
         # The action space is the weights of the airfoil. +1 is for the weight of the leading edge
         self.action_space = spaces.Box(low=-1, high=1, shape=(self.upparameters+self.downparameters+1,), dtype=np.float32) 
         
@@ -46,23 +46,32 @@ class AirfoilEnv(gym.Env):
         """
         This method takes an action and returns the new state, the reward, and whether the episode is done.
         """
+
+        if self.step == 0:
+            self.state.analysis()
+            self.last_efficiency = self.state.get_efficiency
+
         # Update the state of the environment
         self.state.modify_airfoil(action)
         self.state.analysis() # Analyze the airfoil
+
+
+        self.reward = reward(self.state.get_efficiency, self.last_efficiency)
+        self.last_efficiency = self.state.get_efficiency
+
         self.step_counter += 1
-        print(self.state.aerodynamics)
-        """
-        # Calculate the reward
-        self.reward = reward(self.state, self.efficiency_th)
 
         # Check if the episode is done
         if self.step_counter >= self.max_iter:
             self.done = True
 
-        return self.state, self.reward, self.done, {}
-        """
+        # Falta definir una forma de devolver correctamente el airfoil
+        return self.state.airfoil, self.reward, self.done, {}
 
 
+
+    def reset(self):
+        pass
 
 
 
@@ -72,7 +81,7 @@ if __name__ == "__main__":
     camion = AirfoilEnv(test)
     camion.step([[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],0])
     camion.state.airfoil_plot()
-    camion.step([0.1*np.ones(10),-0.1*np.ones(10),0])
+    camion.step([0.35*np.ones(10),0.5*np.ones(10),0.3])
     camion.state.airfoil_plot()
 
     #print(reward(15, 10, delta_reward=False, cl_target=True))
