@@ -26,8 +26,7 @@ class AirfoilEnv(gym.Env):
         self.efficiency_th = efficiency_th 
         self.state = airfoiltools() # Create an airfoil object
         self.state.kulfan(state0[0], state0[1], state0[2]) # Create the airfoil with the Kulfan parameterization
-        self.upparameters = self.state.upparameters # Number of parameters in the upper side of the airfoil
-        self.downparameters = self.state.downparameters
+        self.n_params = self.state.numparams # Number of parameters in one side of the airfoil
         self.done = False # The episode is not done by default 
         self.step_counter = 0
         self.reward = 0
@@ -35,10 +34,10 @@ class AirfoilEnv(gym.Env):
         self.last_efficiency = None # Placeholder for the last efficiency value
 
         # The action space is the weights of the airfoil. +1 is for the weight of the leading edge
-        self.action_space = spaces.Box(low=-1, high=1, shape=(self.upparameters+self.downparameters+1,), dtype=np.float32) 
+        self.action_space = spaces.Box(low=-1, high=1, shape=(self.n_params+1,), dtype=np.float32) 
         
         # The observation space is the airfoil
-        self.observation_space = spaces.Box(low=np.NINF, high=np.Inf, shape=(self.upparameters+self.downparameters+1,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=np.NINF, high=np.Inf, shape=(self.n_params+1,), dtype=np.float32)
 
 
     def _get_info(self):
@@ -52,12 +51,12 @@ class AirfoilEnv(gym.Env):
         """
 
         super().reset(seed=seed)
-        self.state.random_kulfan2(n_params= self.upparameters)
+        self.state.random_kulfan2(n_params= self.n_params)
 
         self.done = False
         self.step_counter = 0
 
-        observation = self.state.airfoil
+        observation = self.state.get_weights()
 
         return observation
 
@@ -89,7 +88,7 @@ class AirfoilEnv(gym.Env):
 
         # NOTE: Falta definir una forma de devolver correctamente el airfoil
         # Normalizar parametrization.py para que trabaje en el formato actual
-        return self.state.airfoil, self.reward, self.done, {}
+        return self.state.get_weights(), self.reward, self.done, {}
     
 
     def render(self):
@@ -98,6 +97,14 @@ class AirfoilEnv(gym.Env):
 
 
 if __name__ == "__main__":
+
+    pedroduque = AirfoilEnv(state0=[0.1*np.ones(10), 0.2*np.ones(10), 0.1])
+
+    observation = pedroduque.reset()
+    observationn, reward, done, info = pedroduque.step(action=[0.1*np.ones(10), 0.2*np.ones(10), 0.1])
+    print(observationn)
+
+    """
     # Create an instance of the AirfoilEnv class
     env = AirfoilEnv(state0=[0.1*np.ones(10), 0.2*np.ones(10), 0.1], max_iter=20, efficiency_th=0.8)
 
@@ -119,3 +126,5 @@ if __name__ == "__main__":
         # Check if the episode is done
         if done:
             break
+            
+    """
