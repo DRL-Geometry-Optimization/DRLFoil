@@ -23,8 +23,8 @@ class airfoiltools:
     def __init__(self):
         self.airfoil = None # Placeholder for the airfoil object
         self.aerodynamics = None # Placeholder for the aerodynamics of the airfoil 
-        self.upparameters = None # Placeholder for the parameters of the airfoil
-        self.downparameters = None # Placeholder for the parameters of the airfoil
+        self.upparameters = None # Placeholder for the number of parameters of the airfoil
+        self.downparameters = None
 
 
 
@@ -72,7 +72,7 @@ class airfoiltools:
 
     # Randomize the airfoil with a different method. This methods parts from the upper and lower weights and randomizes them separately
     # Randomize the weights of the airfoil   
-    def random_kulfan2(self, n_params = 15, variation = 0.1, extra_weight = 0.7, intra_weight = 0.3): 
+    def random_kulfan2(self, n_params = 15, variation = 0.5, extra_weight = 0.5, intra_weight = 0.2): 
         np.random.seed(int(time.time()))
 
         leading_edge_weight = random.uniform(-variation*3, variation*3) # Randomize the leading edge weight
