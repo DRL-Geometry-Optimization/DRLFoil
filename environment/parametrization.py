@@ -23,14 +23,24 @@ class airfoiltools:
     def __init__(self):
         self.airfoil = None # Placeholder for the airfoil object
         self.aerodynamics = None # Placeholder for the aerodynamics of the airfoil 
-        self.upparameters = None # Placeholder for the number of parameters of the airfoil
-        self.downparameters = None
+        self.numparams = None # Placeholder for the number of parameters on each face
 
+
+    @property
+    def upper_weights(self): # Get the upper weights of the airfoil
+        return self.airfoil.upper_weights
+    
+    @property
+    def lower_weights(self): # Get the lower weights of the airfoil
+        return self.airfoil.lower_weights
 
 
     def kulfan(self, lower_weights, upper_weights, leading_edge_weight, TE_thickness = 0, name = ""):
-        self.upparameters = len(upper_weights) # Number of parameters in the upper side of the airfoil
-        self.downparameters = len(lower_weights)
+        if len(lower_weights) != len(upper_weights):
+            raise ValueError("The number of weights in the upper and lower side of the airfoil must be the same")
+
+        self.numparams = len(upper_weights) # Number of parameters in one side of the airfoil
+
         self.airfoil = asb.KulfanAirfoil( # Create the airfoil object with the Kulfan parameterization
         name=name,
         lower_weights=lower_weights,
@@ -144,7 +154,6 @@ class airfoiltools:
         return self.aerodynamics["CD"][0]
 
 
-
     def get_efficiency(self):
         try:
             cl = self.get_cl()
@@ -154,10 +163,13 @@ class airfoiltools:
             raise ValueError(f"An unexpected error occurred while obtaining efficiency: {e}")
         
 
-
     def airfoil_plot(self): # Plot the airfoil 
         fig, ax = plt.subplots(figsize=(6, 2))
         self.airfoil.draw()
+
+
+    def get_weights(self):
+        return self.upper_weights.tolist(), self.lower_weights.tolist(), self.airfoil.leading_edge_weight
 
 
 
@@ -174,16 +186,16 @@ if __name__ == "__main__": #This will only run if the script is run directly, no
     #print(pedro.get_cd())
     #print(pedro.get_efficiency())
 
-    print(pedro.airfoil.upper_weights)
-    print(pedro.airfoil.lower_weights)
+    upper, lower, lew = pedro.get_weights()
+    print(upper, lower, lew)
 
-    pedro.modify_airfoil(np.full(15, 0.3), np.full(15, -0.1), 0.1)
+    #pedro.modify_airfoil([np.ones(15)*0.1, np.ones(15)*0.1, 0.1])
     
     pedro.analysis()
     pedro.airfoil_plot()
 
-    print(pedro.airfoil.upper_weights)
-    print(pedro.airfoil.lower_weights)
+    print(pedro.upper_weights)
+    print(pedro.lower_weights)
     #print(pedro.get_cl())
     #print(pedro.get_cd())
     #print(pedro.get_efficiency())
