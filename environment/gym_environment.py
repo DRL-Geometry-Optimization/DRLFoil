@@ -41,23 +41,45 @@ class AirfoilEnv(gym.Env):
         self.observation_space = spaces.Box(low=np.NINF, high=np.Inf, shape=(self.upparameters+self.downparameters+1,), dtype=np.float32)
 
 
+    def _get_info(self):
+        # Return more information about the environment state (for debugging)
+        return {"CL": self.state.get_cl, "efficiency": self.state.get_efficiency, "step": self.step_counter}
+
+
+    def reset(self, seed=None, options=None):
+        """
+        This method resets the environment to the initial state.
+        """
+
+        super().reset(seed=seed)
+        self.state.random_kulfan2(n_params= self.upparameters)
+
+        self.done = False
+        self.step_counter = 0
+
+        observation = self.state.airfoil
+
+        return observation
+
+
 
     def step(self, action):
         """
         This method takes an action and returns the new state, the reward, and whether the episode is done.
         """
 
-        if self.step == 0:
+        if self.step_counter == 0:
             self.state.analysis()
-            self.last_efficiency = self.state.get_efficiency
+            self.last_efficiency = self.state.get_efficiency()
+
 
         # Update the state of the environment
         self.state.modify_airfoil(action)
         self.state.analysis() # Analyze the airfoil
 
 
-        self.reward = reward(self.state.get_efficiency, self.last_efficiency)
-        self.last_efficiency = self.state.get_efficiency
+        self.reward = reward(self.state.get_efficiency(), self.last_efficiency)
+        self.last_efficiency = self.state.get_efficiency()
 
         self.step_counter += 1
 
@@ -65,23 +87,35 @@ class AirfoilEnv(gym.Env):
         if self.step_counter >= self.max_iter:
             self.done = True
 
-        # Falta definir una forma de devolver correctamente el airfoil
+        # NOTE: Falta definir una forma de devolver correctamente el airfoil
+        # Normalizar parametrization.py para que trabaje en el formato actual
         return self.state.airfoil, self.reward, self.done, {}
+    
 
-
-
-    def reset(self):
+    def render(self):
         pass
 
 
 
-
 if __name__ == "__main__":
-    test = [0.1*np.ones(10),-0.1*np.ones(10),0]
-    camion = AirfoilEnv(test)
-    camion.step([[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],0])
-    camion.state.airfoil_plot()
-    camion.step([0.35*np.ones(10),0.5*np.ones(10),0.3])
-    camion.state.airfoil_plot()
+    # Create an instance of the AirfoilEnv class
+    env = AirfoilEnv(state0=[0.1*np.ones(10), 0.2*np.ones(10), 0.1], max_iter=20, efficiency_th=0.8)
 
-    #print(reward(15, 10, delta_reward=False, cl_target=True))
+    # Reset the environment
+    observation = env.reset()
+
+    # Run the simulation for a fixed number of steps
+    for _ in range(2):
+        # Choose a random action
+        action = env.action_space.sample()
+
+        # Take a step in the environment
+        observation, reward, done, info = env.step(action)
+
+        # Print the current state and reward
+        print("Observation:", observation)
+        print("Reward:", reward)
+
+        # Check if the episode is done
+        if done:
+            break
