@@ -11,26 +11,38 @@ from .reward import reward
 class AirfoilEnv(gym.Env):
     metadata = {'render.modes': ["human", "no_display"], "render_fps": 4 }
 
-    def __init__(self, state0, max_iter=300, efficiency_th=None):
+    def __init__(self, state0, # Initial state of the environment
+                 max_iter=300, reward_threshold=None, # Iterations control
+                 cl_reward=False, cl_target=None, cl_maxreward=40, cl_wide=15, delta_reward=False, efficiency_param=1): # Reward control
 
         # state0 should have the following structure: [[UPPARAMETERS],[DOWNPARAMETERS],LE_weight]
+
+        # NOTE: IF CL_TARGET IS ACTIVATED, THE NEURAL NETWORK SHOULD HAVE THE CL TARGET AS INPUT
 
         if len(state0) == 3:
             pass
         else:
             raise ValueError(f"State should be an array of 3 arrays. Length obtained: {len(state0)}")
-
-        #self.upparameters = len(state0[0]) # Number of parameters in the upper side of the airfoil
-        #self.downparameters = len(state0[1])
+        
+        # Input parameters
         self.max_iter = max_iter
-        self.efficiency_th = efficiency_th 
+        self.efficiency_th = reward_threshold
+        self.cl_reward = cl_reward
+        self.cl_target = cl_target
+        self.cl_maxreward = cl_maxreward
+        self.cl_wide = cl_wide
+        self.delta_reward = delta_reward
+        self.efficiency_param = efficiency_param
+
+        # Create the airfoil object
         self.state = airfoiltools() # Create an airfoil object
         self.state.kulfan(state0[0], state0[1], state0[2]) # Create the airfoil with the Kulfan parameterization
         self.n_params = self.state.numparams # Number of parameters in one side of the airfoil
+
+        # Initialize the environment state
         self.done = False # The episode is not done by default 
         self.step_counter = 0
         self.reward = 0
-
         self.last_efficiency = None # Placeholder for the last efficiency value
 
         # The action space is the weights of the airfoil. +1 is for the weight of the leading edge
