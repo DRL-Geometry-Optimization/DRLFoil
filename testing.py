@@ -7,7 +7,7 @@ import numpy as np
 Testing the environment
 """
 
-s0 = [0.3*np.ones(10), -0.05*np.ones(10), 0.1] # Initial state
+"""s0 = [0.3*np.ones(10), -0.05*np.ones(10), 0.1] # Initial state
 
 # ENVIRONMENT CREATION
 env = AirfoilEnv(state0=s0)
@@ -31,7 +31,14 @@ for _ in range(3):
         if done:
             break
 
-    env.reset()
+    env.reset()"""
+
+# REWARD TESTING
+efficiency = 20
+
+reward_obtained = reward(efficiency=efficiency, cl_reward=True, cl=0.35, cl_target=0.4, delta_reward=True, last_efficiency=15)
+
+print(f"Reward obtained: {reward_obtained}")
 
 
 
