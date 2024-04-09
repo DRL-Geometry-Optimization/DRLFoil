@@ -2,8 +2,8 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 
-from parametrization import airfoiltools
-from reward import reward
+from .parametrization import airfoiltools
+from .reward import reward
 
 # Tutorial: https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 
@@ -13,7 +13,7 @@ class AirfoilEnv(gym.Env):
 
     def __init__(self, state0, max_iter=300, efficiency_th=None):
 
-        # state0 should have the following structure: [[downparameters],[upparameters],LE_weight]
+        # state0 should have the following structure: [[UPPARAMETERS],[DOWNPARAMETERS],LE_weight]
 
         if len(state0) == 3:
             pass
