@@ -35,7 +35,7 @@ class airfoiltools:
         return self.airfoil.lower_weights
 
 
-    def kulfan(self, lower_weights, upper_weights, leading_edge_weight, TE_thickness = 0, name = ""):
+    def kulfan(self, upper_weights, lower_weights, leading_edge_weight, TE_thickness = 0, name = ""):
         if len(lower_weights) != len(upper_weights):
             raise ValueError("The number of weights in the upper and lower side of the airfoil must be the same")
 
@@ -108,8 +108,8 @@ class airfoiltools:
     # Modify the airfoil by changing the weights of the parameters.
     # The weights are added to the existing weights of the airfoil!
     def modify_airfoil(self, action, TE_thickness = 0, name = ""):
-        self.airfoil.upper_weights = self.airfoil.upper_weights + action[1]
-        self.airfoil.lower_weights = self.airfoil.lower_weights + action[0]
+        self.airfoil.upper_weights = self.airfoil.upper_weights + action[0]
+        self.airfoil.lower_weights = self.airfoil.lower_weights + action[1]
         self.airfoil.leading_edge_weight = self.airfoil.leading_edge_weight + action[2]
         self.airfoil.TE_thickness = self.airfoil.TE_thickness + TE_thickness
         self.airfoil.name = name # Change the name of the airfoil if needed
