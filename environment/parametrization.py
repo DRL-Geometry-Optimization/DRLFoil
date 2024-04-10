@@ -107,10 +107,15 @@ class airfoiltools:
 
     # Modify the airfoil by changing the weights of the parameters.
     # The weights are added to the existing weights of the airfoil!
-    def modify_airfoil(self, action, TE_thickness = 0, name = ""):
-        self.airfoil.upper_weights = self.airfoil.upper_weights + action[0]
-        self.airfoil.lower_weights = self.airfoil.lower_weights + action[1]
-        self.airfoil.leading_edge_weight = self.airfoil.leading_edge_weight + action[2]
+    def modify_airfoil(self, action, n_params, TE_thickness = 0, name = ""):
+
+        # Split the action into the upper weights, lower weights, and leading edge weight 
+        # NOTE: this is a so bad way to do it, but it works FOR NOW. It should be changed in the future
+        act = [action[:n_params], action[n_params:2*n_params], action[-1]]
+
+        self.airfoil.upper_weights = self.airfoil.upper_weights + act[0]
+        self.airfoil.lower_weights = self.airfoil.lower_weights + act[1]
+        self.airfoil.leading_edge_weight = self.airfoil.leading_edge_weight + act[2]
         self.airfoil.TE_thickness = self.airfoil.TE_thickness + TE_thickness
         self.airfoil.name = name # Change the name of the airfoil if needed
 
@@ -169,8 +174,8 @@ class airfoiltools:
 
 
     def get_weights(self):
-        return self.upper_weights.tolist(), self.lower_weights.tolist(), self.airfoil.leading_edge_weight
-
+        #return np.array(self.upper_weights.tolist(), dtype=np.float32), np.array(self.lower_weights.tolist(), dtype=np.float32), np.array(self.airfoil.leading_edge_weight, dtype=np.float32)
+        return self.upper_weights.tolist(), self.lower_weights.tolist(), [self.airfoil.leading_edge_weight]
 
     def get_coordinates(self): # Get the coordinates of the airfoil
         return self.airfoil.upper_coordinates(), self.airfoil.lower_coordinates()
