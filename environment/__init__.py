@@ -1,8 +1,6 @@
-"""from gymnasium.envs.registration import register
+from gym.envs.registration import register
 
 register(
-    id='Airfoil-v0',
-    entry_point='gymnasium.envs:AirfoilEnv',
-    max_episode_steps=300,
-    reward_threshold=25.0,
-)"""
+    id='AirfoilEnv-v0',
+    entry_point='environment.gym_environment:AirfoilEnv',
+)

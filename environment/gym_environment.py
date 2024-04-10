@@ -1,6 +1,8 @@
 import numpy as np
-import gymnasium as gym
-from gymnasium import spaces
+import gym
+from gym import spaces
+#import gymnasium as gym
+#from gymnasium import spaces
 
 from .parametrization import airfoiltools
 from .reward import reward
@@ -18,6 +20,7 @@ class AirfoilEnv(gym.Env):
         # state0 should have the following structure: [[UPPARAMETERS],[DOWNPARAMETERS],LE_weight]
 
         # NOTE: IF CL_TARGET IS ACTIVATED, THE NEURAL NETWORK SHOULD HAVE THE CL TARGET AS INPUT
+        # NOTE: s0 SHOULD BE USED ON RESET METHOD TO RESET THE ENVIRONMENT TO THE INITIAL STATE
 
         if len(state0) == 3:
             pass
@@ -46,10 +49,10 @@ class AirfoilEnv(gym.Env):
         self.last_efficiency = None # Placeholder for the last efficiency value
 
         # The action space is the weights of the airfoil. +1 is for the weight of the leading edge
-        self.action_space = spaces.Box(low=-1, high=1, shape=(self.n_params+1,), dtype=np.float32) 
+        self.action_space = spaces.Box(low=-1, high=1, shape=(2*self.n_params+1,), dtype=np.float32) 
         
         # The observation space is the airfoil
-        self.observation_space = spaces.Box(low=np.NINF, high=np.Inf, shape=(self.n_params+1,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=np.NINF, high=np.Inf, shape=(2*self.n_params+1,), dtype=np.float32)
 
 
     def _get_info(self):
@@ -116,6 +119,8 @@ class AirfoilEnv(gym.Env):
 
         if self.step_counter > self.max_steps:
             self.done = True
+
+        self.state.airfoil_plot()
 
         return self.state.get_weights(), self.reward, self.done, {}
     
