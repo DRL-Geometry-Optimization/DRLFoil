@@ -4,11 +4,11 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # Coeficiente eficiencia
-alpha = 2 # Pendiente de la eficiencia
+alpha = 1 # Pendiente de la eficiencia
 
 # Coeficientes de delta Cl
 beta = 40 # Alto de la campana
-gamma = 10 # Ancho de la campana
+gamma = 15 # Ancho de la campana
 
 
 # Definir los rangos de E (eficiencia) y |ΔCl| (desviación del Cl)
