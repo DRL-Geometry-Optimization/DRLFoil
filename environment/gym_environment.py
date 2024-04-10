@@ -44,21 +44,25 @@ class AirfoilEnv(gym.Env):
         self.last_efficiency = None # Placeholder for the last efficiency value
 
 
-
-        higher_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32)
+        # Since different problems with action and observation spaces, box spaces are used
+        """higher_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32)
         lower_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32)
         le_action_space = spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
 
         self.action_space = spaces.Tuple((higher_action_space, lower_action_space, le_action_space))
+
+        #self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
         
         # The observation space is the airfoil
         higher_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32)
         lower_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32)
         le_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32)
 
-        self.observation_space = spaces.Tuple((higher_obs_space, lower_obs_space, le_obs_space))
+        self.observation_space = spaces.Tuple((higher_obs_space, lower_obs_space, le_obs_space))"""
 
-        #self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params+1,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
+
+        self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params+1,), dtype=np.float32)
 
 
     def _get_info(self):
@@ -70,19 +74,18 @@ class AirfoilEnv(gym.Env):
         """
         This method resets the environment to the initial state.
         """
-
         super().reset(seed=seed)
+        # Reset the environment state 
         self.state.random_kulfan2(n_params= self.n_params)
 
         self.done = False
         self.step_counter = 0
 
         upper, lower, le = self.state.get_weights()
-        #observation = np.array(upper + lower+ le, dtype=np.float32)
-        observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32)
+        observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
+        #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
 
-        info = {}
-        self.state.airfoil_plot()
+        info = {} # Placeholder for additional information
 
         return observation, info
 
@@ -93,16 +96,16 @@ class AirfoilEnv(gym.Env):
         This method takes an action and returns the new state, the reward, and whether the episode is done.
         """
 
-        if self.step_counter == 0:
+        if self.step_counter <= 0:
             self.state.analysis()
             self.last_efficiency = self.state.get_efficiency()
 
 
         # Update the state of the environment
-        self.state.modify_airfoil(action)
+        self.state.modify_airfoil(action, n_params=self.n_params)
 
         # Reward calculation
-        if self.state.check_airfoil() == False:
+        if self.state.check_airfoil() == False: # If the airfoil is invalid (upper side is below the lower side)
             self.reward = -100
             # Last efficiency is not updated
         else:
@@ -128,14 +131,14 @@ class AirfoilEnv(gym.Env):
             if self.state.get_efficiency() >= self.efficiency_th:
                 self.done = True
 
-        if self.step_counter > self.max_steps:
+        if self.step_counter >= self.max_steps:
             self.done = True
 
         upper, lower, le = self.state.get_weights()
-        #observation = np.array(upper + lower+ le, dtype=np.float32)
-        observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32)
+        observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
+        #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
 
-        return observation, self.reward, self.done, False, {}
+        return observation, self.reward, self.done, False, {"step": self.step_counter}
     
 
     def render(self):
