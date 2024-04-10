@@ -102,7 +102,7 @@ class airfoiltools:
 
 
         # Create the airfoil
-        self.kulfan(lower_weights, upper_weights, leading_edge_weight, TE_thickness)
+        self.kulfan(lower_weights=lower_weights, upper_weights=upper_weights, leading_edge_weight=leading_edge_weight, TE_thickness=TE_thickness)
 
 
     # Modify the airfoil by changing the weights of the parameters.
@@ -172,6 +172,23 @@ class airfoiltools:
         return self.upper_weights.tolist(), self.lower_weights.tolist(), self.airfoil.leading_edge_weight
 
 
+    def get_coordinates(self): # Get the coordinates of the airfoil
+        return self.airfoil.upper_coordinates(), self.airfoil.lower_coordinates()
+    
+    # Check if the airfoil is valid (upper side is above the lower side) 
+    def check_airfoil(self):
+        if self.airfoil is None:
+            raise ValueError("Please, create an airfoil first")
+        else:
+            up, low = self.get_coordinates()
+            for i in range(len(up)):
+                # The loop goes through all the points of the airfoil and checks if the upper side is above the lower side
+                #if up[i][0] != low[-i-1][0]:
+                #    raise ValueError("Something went wrong. The airfoil coordinates are not aligned. Please, check the airfoil coordinates.")
+                if up[i][1] < low[-i-1][1]:
+                    return False
+            # If the airfoil is valid, return True    
+            return True
 
 
 
