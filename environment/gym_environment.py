@@ -12,7 +12,7 @@ class AirfoilEnv(gym.Env):
     metadata = {'render.modes': ["human", "no_display"], "render_fps": 4 }
 
     def __init__(self, state0, # Initial state of the environment
-                 max_iter=300, reward_threshold=None, # Iterations control
+                 max_steps=50, reward_threshold=None, # Iterations control
                  cl_reward=False, cl_target=None, cl_maxreward=40, cl_wide=15, delta_reward=False, efficiency_param=1): # Reward control
 
         # state0 should have the following structure: [[UPPARAMETERS],[DOWNPARAMETERS],LE_weight]
@@ -25,7 +25,7 @@ class AirfoilEnv(gym.Env):
             raise ValueError(f"State should be an array of 3 arrays. Length obtained: {len(state0)}")
         
         # Input parameters
-        self.max_iter = max_iter
+        self.max_steps = max_steps
         self.efficiency_th = reward_threshold
         self.cl_reward = cl_reward
         self.cl_target = cl_target
@@ -86,20 +86,37 @@ class AirfoilEnv(gym.Env):
 
         # Update the state of the environment
         self.state.modify_airfoil(action)
-        self.state.analysis() # Analyze the airfoil
 
+        # Reward calculation
+        if self.state.check_airfoil() == False:
+            self.reward = -100
+            # Last efficiency is not updated
+        else:
+            self.state.analysis() # Analyze the airfoil
 
-        self.reward = reward(self.state.get_efficiency(), self.last_efficiency)
-        self.last_efficiency = self.state.get_efficiency()
+            # NOTE: REWARD SHOULD BE UPTADETED TO INCLUDE THE CL TARGET
+            self.reward = reward(efficiency=self.state.get_efficiency(),
+                                efficiency_param=self.efficiency_param, 
+                                last_efficiency=self.last_efficiency,
+                                cl_reward=self.cl_reward,
+                                cl=self.state.get_cl(),
+                                cl_target=self.cl_target, 
+                                cl_maxreward=self.cl_maxreward, 
+                                cl_wide=self.cl_wide, 
+                                delta_reward=self.delta_reward)
+            # Update the last efficiency
+            self.last_efficiency = self.state.get_efficiency()
 
         self.step_counter += 1
 
         # Check if the episode is done
-        if self.step_counter >= self.max_iter:
+        if self.efficiency_th is not None:
+            if self.state.get_efficiency() >= self.efficiency_th:
+                self.done = True
+
+        if self.step_counter > self.max_steps:
             self.done = True
 
-        # NOTE: Falta definir una forma de devolver correctamente el airfoil
-        # Normalizar parametrization.py para que trabaje en el formato actual
         return self.state.get_weights(), self.reward, self.done, {}
     
 

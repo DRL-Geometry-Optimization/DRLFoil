@@ -22,6 +22,7 @@ def reward(efficiency, efficiency_param=1, cl_reward = False, cl = None, cl_targ
         if cl_reward == False:
             return efficiency_param*efficiency
         # Cl target True
+        # NOTE: IF CL_TARGET IS ACTIVATED, THE NEURAL NETWORK SHOULD HAVE THE CL TARGET AS INPUT
         else:
             delta_Cl = cl - cl_target
             return efficiency_param*efficiency + cl_maxreward*np.exp(-cl_wide*(delta_Cl)**2)
