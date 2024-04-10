@@ -70,13 +70,16 @@ class AirfoilEnv(gym.Env):
         return {"CL": self.state.get_cl, "efficiency": self.state.get_efficiency, "step": self.step_counter}
 
 
-    def reset(self, seed=None, options=None):
+    def reset(self, seed=None, airfoil=None):
         """
         This method resets the environment to the initial state.
         """
         super().reset(seed=seed)
         # Reset the environment state 
-        self.state.random_kulfan2(n_params= self.n_params)
+        if airfoil is not None:
+            self.state.kulfan(upper_weights=airfoil[0], lower_weights=airfoil[1], leading_edge_weight=airfoil[2])
+        else:
+            self.state.random_kulfan2(n_params= self.n_params)
 
         self.done = False
         self.step_counter = 0
@@ -86,6 +89,8 @@ class AirfoilEnv(gym.Env):
         #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
 
         info = {} # Placeholder for additional information
+
+        self.state.airfoil_plot() # Plot the airfoil
 
         return observation, info
 
@@ -137,6 +142,8 @@ class AirfoilEnv(gym.Env):
         upper, lower, le = self.state.get_weights()
         observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
         #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
+
+        self.state.airfoil_plot() # Plot the airfoil
 
         return observation, self.reward, self.done, False, {"step": self.step_counter}
     
