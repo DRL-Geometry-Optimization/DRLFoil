@@ -169,8 +169,8 @@ class airfoiltools:
 
 
     def get_weights(self):
-        return self.upper_weights.tolist(), self.lower_weights.tolist(), self.airfoil.leading_edge_weight
-
+        #return np.array(self.upper_weights.tolist(), dtype=np.float32), np.array(self.lower_weights.tolist(), dtype=np.float32), np.array(self.airfoil.leading_edge_weight, dtype=np.float32)
+        return self.upper_weights.tolist(), self.lower_weights.tolist(), [self.airfoil.leading_edge_weight]
 
     def get_coordinates(self): # Get the coordinates of the airfoil
         return self.airfoil.upper_coordinates(), self.airfoil.lower_coordinates()
