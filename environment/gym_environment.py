@@ -45,7 +45,7 @@ class AirfoilEnv(gym.Env):
 
 
         # Since different problems with action and observation spaces, box spaces are used
-        higher_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32)
+        """higher_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32)
         lower_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32)
         le_action_space = spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
 
@@ -58,11 +58,11 @@ class AirfoilEnv(gym.Env):
         lower_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32)
         le_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32)
 
-        self.observation_space = spaces.Tuple((higher_obs_space, lower_obs_space, le_obs_space))
+        self.observation_space = spaces.Tuple((higher_obs_space, lower_obs_space, le_obs_space))"""
 
-        #self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
 
-        #self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params+1,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params+1,), dtype=np.float32)
 
 
     def _get_info(self):
@@ -85,8 +85,8 @@ class AirfoilEnv(gym.Env):
         self.step_counter = 0
 
         upper, lower, le = self.state.get_weights()
-        #observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
-        observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
+        observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
+        #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
 
         info = {} # Placeholder for additional information
 
@@ -140,8 +140,8 @@ class AirfoilEnv(gym.Env):
             self.done = True
 
         upper, lower, le = self.state.get_weights()
-        #observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
-        observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
+        observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
+        #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
 
         #self.state.airfoil_plot() # Plot the airfoil
 
