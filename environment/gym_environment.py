@@ -148,7 +148,7 @@ class AirfoilEnv(gym.Env):
         observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
         #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
 
-        #self.state.airfoil_plot() # Plot the airfoil
+        self.state.airfoil_plot() # Plot the airfoil
 
         return observation, self.reward, self.done, False, {"step": self.step_counter}
     
