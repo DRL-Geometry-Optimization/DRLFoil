@@ -48,26 +48,31 @@ class AirfoilEnv(gym.Env):
 
         self.render_mode = render_mode
 
+        # Spaces dict is not used since it means observations are from different types of data. MultiLayerInput 
+        # of Stable Baselines 3 is not the most efficient way to handle this. 
 
-        # Since different problems with action and observation spaces, box spaces are used
-        """higher_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32)
-        lower_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32)
-        le_action_space = spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
+        """self.observation_space = spaces.Dict({
+            "upper": spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32),
+            "lower": spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32),
+            "le": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32)
+        })"""
 
-        self.action_space = spaces.Tuple((higher_action_space, lower_action_space, le_action_space))
+        """self.action_space = spaces.Dict({
+            "upper": spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32),
+            "lower": spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32),
+            "le": spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
+        })"""
 
-        #self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
-        
-        # The observation space is the airfoil
-        higher_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32)
-        lower_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32)
-        le_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32)
-
-        self.observation_space = spaces.Tuple((higher_obs_space, lower_obs_space, le_obs_space))"""
+        # Actions: 
+        # 1. Upper side parameters
+        # 2. Lower side parameters
+        # 3. Leading edge weight
+        # 4. Cl target (if activated)
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
 
         self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params+1,), dtype=np.float32)
+
 
 
     def _get_info(self):
@@ -91,7 +96,13 @@ class AirfoilEnv(gym.Env):
 
         upper, lower, le = self.state.get_weights()
         observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
-        #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
+
+
+        """observation = {
+            "upper": np.array(upper, dtype=np.float32),
+            "lower": np.array(lower, dtype=np.float32),
+            "le": np.array(le, dtype=np.float32)
+        }"""
 
         self.state.analysis() # Analyze the airfoil
         self.last_efficiency = self.state.get_efficiency()
@@ -109,9 +120,6 @@ class AirfoilEnv(gym.Env):
         This method takes an action and returns the new state, the reward, and whether the episode is done.
         """
 
-        """if self.step_counter <= 0:
-            self.state.analysis()
-            self.last_efficiency = self.state.get_efficiency()"""
 
         # Scale the action
         action = action * self.scale_actions
@@ -153,8 +161,8 @@ class AirfoilEnv(gym.Env):
             self.done = True
 
         upper, lower, le = self.state.get_weights()
+        
         observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
-        #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
 
         #self.state.airfoil_plot() # Plot the airfoil
 
