@@ -13,7 +13,7 @@ from .reward import reward
 class AirfoilEnv(gym.Env):
     metadata = {'render.modes': ["human", "no_display"], "render_fps": 4 }
 
-    def __init__(self, n_params = 15, # Initial state of the environment
+    def __init__(self, n_params = 15, scale_actions = 1, # Initial state of the environment
                  max_steps=50, reward_threshold=None, # Iterations control
                  cl_reward=False, cl_target=None, cl_maxreward=40, cl_wide=15, delta_reward=False, efficiency_param=1): # Reward control
 
@@ -32,6 +32,7 @@ class AirfoilEnv(gym.Env):
         self.cl_wide = cl_wide
         self.delta_reward = delta_reward
         self.efficiency_param = efficiency_param
+        self.scale_actions = scale_actions
 
         # Create the airfoil object
         self.state = airfoiltools() # Create an airfoil object
@@ -96,7 +97,7 @@ class AirfoilEnv(gym.Env):
 
 
 
-    def step(self, action):
+    def step(self, action: np.ndarray):
         """
         This method takes an action and returns the new state, the reward, and whether the episode is done.
         """
@@ -104,6 +105,9 @@ class AirfoilEnv(gym.Env):
         if self.step_counter <= 0:
             self.state.analysis()
             self.last_efficiency = self.state.get_efficiency()
+
+        # Scale the action
+        action = action * self.scale_actions
 
 
         # Update the state of the environment
@@ -143,7 +147,7 @@ class AirfoilEnv(gym.Env):
         observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
         #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
 
-        #self.state.airfoil_plot() # Plot the airfoil
+        self.state.airfoil_plot() # Plot the airfoil
 
         return observation, self.reward, self.done, False, {"step": self.step_counter}
     
