@@ -11,9 +11,10 @@ from .reward import reward
 
 
 class AirfoilEnv(gym.Env):
-    metadata = {'render.modes': ["human", "no_display"], "render_fps": 4 }
+    metadata = {'render_modes': ["human", "no_display"], "render_fps": 2 }
 
-    def __init__(self, n_params = 15, scale_actions = 1, airfoil_seed = None, # Initial state of the environment
+    def __init__(self, render_mode= None,
+                 n_params = 15, scale_actions = 1, airfoil_seed = None, # Initial state of the environment
                  max_steps=50, reward_threshold=None, # Iterations control
                  cl_reward=False, cl_target=None, cl_maxreward=40, cl_wide=15, delta_reward=False, efficiency_param=1): # Reward control
 
@@ -44,6 +45,8 @@ class AirfoilEnv(gym.Env):
         self.step_counter = 0
         self.reward = 0
         self.last_efficiency = None # Placeholder for the last efficiency value
+
+        self.render_mode = render_mode
 
 
         # Since different problems with action and observation spaces, box spaces are used
@@ -135,7 +138,7 @@ class AirfoilEnv(gym.Env):
                                 cl_wide=self.cl_wide, 
                                 delta_reward=self.delta_reward)
             # Since last efficiency is going to be updated, the last efficiency output is saved
-            last_efficiency_output = self.last_efficiency
+            #last_efficiency_output = self.last_efficiency
             # Update the last efficiency
             self.last_efficiency = self.state.get_efficiency()
 
@@ -155,12 +158,16 @@ class AirfoilEnv(gym.Env):
 
         #self.state.airfoil_plot() # Plot the airfoil
 
-        return observation, self.reward, self.done, False, {"step": self.step_counter, "efficiency": last_efficiency_output,
-                                                            "last_efficiency": self.last_efficiency, "cl": self.state.get_cl()}
+        return observation, self.reward, self.done, False, {"step": self.step_counter, "efficiency": self.state.get_efficiency(),
+                                                            "cl": self.state.get_cl()}
     
 
-    def render(self, mode='human'):
-        self.state.airfoil_plot()
+    def render(self):
+        if self.render_mode == "human":
+            self.state.airfoil_plot()
+            
+        elif self.render_mode == "no_display":
+            pass
 
 
 
