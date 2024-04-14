@@ -19,5 +19,5 @@ model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=dict(net_arch=[128, 128])
 # Train the agent and display a progress bar
 model.learn(total_timesteps=int(200000), progress_bar=True)
 # Save the agent
-model.save("TestModel_14042024_4_seedairfoil_net128")
+model.save("TestModel_14042024_5_GoogleColab")
 #del model  # delete trained model to demonstrate loading"

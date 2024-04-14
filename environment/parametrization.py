@@ -140,7 +140,7 @@ class airfoiltools:
     def analysis(self, angle = 0, re = 1e6, model = "xlarge"): # Analyze the airfoil and save into the aerodynamics attribute (dictionary)
         self.aerodynamics = nf.get_aero_from_kulfan_parameters(
             self.airfoil.kulfan_parameters, 
-            angle, re, 
+            angle, re,
             model)
 
 
