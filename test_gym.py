@@ -8,7 +8,7 @@ env = gym.make('AirfoilEnv-v0', n_params=15, max_steps=3)
 
 # Reset the environment
 
-observation, _ = env.reset(airfoil=[0.1*np.ones(15), -0.1*np.ones(15), 0.0])
+observation, _ = env.reset(airfoil=None)
 print(f"RESET:{observation}")
 #observation = env.reset()
 env.render()
