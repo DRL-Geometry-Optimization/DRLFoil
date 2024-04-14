@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 import environment
 import numpy as np
 import os
@@ -38,5 +38,5 @@ model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=dict(net_arch=[128, 128])
 # Train the agent and display a progress bar
 model.learn(total_timesteps=int(400000), progress_bar=True, callback=eval_callback)
 # Save the agent
-model.save("14042024_DeltaReward")
+model.save("TITULO")
 #del model  # delete trained model to demonstrate loading"

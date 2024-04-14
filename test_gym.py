@@ -1,5 +1,5 @@
 
-import gym
+import gymnasium as gym
 import environment
 import numpy as np
 
