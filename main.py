@@ -19,7 +19,8 @@ env_id = 'AirfoilEnv-v0'
 
 
 # Create the environment
-env = gym.make('AirfoilEnv-v0', n_params=10, max_steps=10, scale_actions = 0.4, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0])
+env = gym.make('AirfoilEnv-v0', n_params=10, max_steps=10, scale_actions = 0.4, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0],
+               delta_reward=True)
 #train_env = make_vec_env(env_id, n_envs=n_training_envs, n_params=10, max_steps=10, scale_actions = 0.4, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0])
 
 # Reset the environment
@@ -37,5 +38,5 @@ model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=dict(net_arch=[128, 128])
 # Train the agent and display a progress bar
 model.learn(total_timesteps=int(400000), progress_bar=True, callback=eval_callback)
 # Save the agent
-model.save("Prueba")
+model.save("14042024_DeltaReward")
 #del model  # delete trained model to demonstrate loading"
