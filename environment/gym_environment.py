@@ -90,6 +90,9 @@ class AirfoilEnv(gym.Env):
         observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
         #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
 
+        self.state.analysis() # Analyze the airfoil
+        self.last_efficiency = self.state.get_efficiency()
+
         info = {} # Placeholder for additional information
 
         #self.state.airfoil_plot() # Plot the airfoil
@@ -103,9 +106,9 @@ class AirfoilEnv(gym.Env):
         This method takes an action and returns the new state, the reward, and whether the episode is done.
         """
 
-        if self.step_counter <= 0:
+        """if self.step_counter <= 0:
             self.state.analysis()
-            self.last_efficiency = self.state.get_efficiency()
+            self.last_efficiency = self.state.get_efficiency()"""
 
         # Scale the action
         action = action * self.scale_actions
@@ -131,6 +134,8 @@ class AirfoilEnv(gym.Env):
                                 cl_maxreward=self.cl_maxreward, 
                                 cl_wide=self.cl_wide, 
                                 delta_reward=self.delta_reward)
+            # Since last efficiency is going to be updated, the last efficiency output is saved
+            last_efficiency_output = self.last_efficiency
             # Update the last efficiency
             self.last_efficiency = self.state.get_efficiency()
 
@@ -148,9 +153,10 @@ class AirfoilEnv(gym.Env):
         observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
         #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
 
-        self.state.airfoil_plot() # Plot the airfoil
+        #self.state.airfoil_plot() # Plot the airfoil
 
-        return observation, self.reward, self.done, False, {"step": self.step_counter}
+        return observation, self.reward, self.done, False, {"step": self.step_counter, "efficiency": last_efficiency_output,
+                                                            "last_efficiency": self.last_efficiency, "cl": self.state.get_cl()}
     
 
     def render(self, mode='human'):
