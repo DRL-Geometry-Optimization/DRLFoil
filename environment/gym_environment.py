@@ -13,7 +13,7 @@ from .reward import reward
 class AirfoilEnv(gym.Env):
     metadata = {'render.modes': ["human", "no_display"], "render_fps": 4 }
 
-    def __init__(self, n_params = 15, scale_actions = 1, # Initial state of the environment
+    def __init__(self, n_params = 15, scale_actions = 1, airfoil_seed = None, # Initial state of the environment
                  max_steps=50, reward_threshold=None, # Iterations control
                  cl_reward=False, cl_target=None, cl_maxreward=40, cl_wide=15, delta_reward=False, efficiency_param=1): # Reward control
 
@@ -33,6 +33,7 @@ class AirfoilEnv(gym.Env):
         self.delta_reward = delta_reward
         self.efficiency_param = efficiency_param
         self.scale_actions = scale_actions
+        self.airfoil_seed = airfoil_seed
 
         # Create the airfoil object
         self.state = airfoiltools() # Create an airfoil object
@@ -77,8 +78,8 @@ class AirfoilEnv(gym.Env):
         """
         super().reset(seed=seed)
         # Reset the environment state 
-        if airfoil is not None:
-            self.state.kulfan(upper_weights=airfoil[0], lower_weights=airfoil[1], leading_edge_weight=airfoil[2])
+        if self.airfoil_seed is not None:
+            self.state.kulfan(upper_weights=self.airfoil_seed[0], lower_weights=self.airfoil_seed[1], leading_edge_weight=self.airfoil_seed[2])
         else:
             self.state.random_kulfan2(n_params= self.n_params)
 
