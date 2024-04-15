@@ -20,12 +20,12 @@ env_id = 'AirfoilEnv-v0'
 
 # Create the environment
 env = gym.make('AirfoilEnv-v0', n_params=10, max_steps=10, scale_actions = 0.4, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0],
-               delta_reward=True)
+               delta_reward=False, cl_reward = True, cl_reset = None,)
 #train_env = make_vec_env(env_id, n_envs=n_training_envs, n_params=10, max_steps=10, scale_actions = 0.4, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0])
 
 # Reset the environment
 env.reset()
-env.render()
+#env.render()
 
 eval_callback = EvalCallback(env, best_model_save_path=eval_log_dir,
                               log_path=eval_log_dir, eval_freq=max(2000, 1),
