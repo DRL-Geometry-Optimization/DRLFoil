@@ -272,6 +272,14 @@ class airfoiltools:
                 #    raise ValueError("Something went wrong. The airfoil coordinates are not aligned. Please, check the airfoil coordinates.")
                 if up[i][1] < low[-i-1][1]:
                     return False
+                
+                if i > 3 and i < 10: # Check if the airfoil is too thin in the middle leading edge
+                    if up[-i-1][1] - low[i][1] < 0.01:
+                        return False
+                    
+                    
+                if i == 1 and low[i][1] > 0.008: # Check if the airfoil is like the nose of a bird
+                    return False
             # If the airfoil is valid, return True    
             return True
 
