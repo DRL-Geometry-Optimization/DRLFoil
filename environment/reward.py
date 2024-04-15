@@ -1,8 +1,8 @@
 import numpy as np
 
-def reward(efficiency, efficiency_param=2, 
-           cl_reward = False, cl = None, cl_target = None, cl_maxreward = 80, cl_wide = 15, 
-           delta_reward = False, last_efficiency = None):
+def reward(efficiency : float, efficiency_param : float = 0.5, 
+           cl_reward : bool = False, cl : float = None, cl_target : float = None, cl_wide : float = 8, 
+           delta_reward : bool = False, last_efficiency : float = None):
     # Delta Reward True
     if delta_reward == True:
         # Cl target False
@@ -26,7 +26,7 @@ def reward(efficiency, efficiency_param=2,
         # NOTE: IF CL_TARGET IS ACTIVATED, THE NEURAL NETWORK SHOULD HAVE THE CL TARGET AS INPUT
         else:
             delta_Cl = cl - cl_target
-            return efficiency_param*efficiency + cl_maxreward*np.exp(-cl_wide*(delta_Cl)**2)
+            return efficiency_param*efficiency*np.exp(-cl_wide*(delta_Cl)**2)
     
 
 
