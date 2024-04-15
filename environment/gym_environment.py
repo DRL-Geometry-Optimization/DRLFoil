@@ -29,7 +29,7 @@ class AirfoilEnv(gym.Env):
 
         if cl_reward == True and self.cl_reset is not None:
             self.cl_target = self.cl_reset # Cl target is fixed
-        elif cl_reward == True and self.cl_reset is None:
+        else:
             self.cl_target = None # Placeholder for the cl target that will be randomly generated in the reset method
 
         self.cl_maxreward = cl_maxreward
@@ -109,7 +109,11 @@ class AirfoilEnv(gym.Env):
 
 
         upper, lower, le = self.state.get_weights()
-        observation = np.array(upper + lower + le + [self.cl_target], dtype=np.float32) # In case of using Box observation space
+
+        if self.cl_reward == True:
+            observation = np.array(upper + lower + le + [self.cl_target], dtype=np.float32)
+        else:
+            observation = np.array(upper + lower + le, dtype=np.float32)
 
 
         """observation = {
@@ -176,7 +180,11 @@ class AirfoilEnv(gym.Env):
 
         upper, lower, le = self.state.get_weights()
         
-        observation = np.array(upper + lower + le + [self.cl_target], dtype=np.float32) # In case of using Box observation space
+
+        if self.cl_reward == True:
+            observation = np.array(upper + lower + le + [self.cl_target], dtype=np.float32)
+        else:
+            observation = np.array(upper + lower + le, dtype=np.float32)
 
         #self.state.airfoil_plot() # Plot the airfoil
 
