@@ -34,7 +34,7 @@ eval_callback = EvalCallback(env, best_model_save_path=eval_log_dir,
 
 
 # Instantiate the agent
-model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=dict(net_arch=[128, 128]))
+model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=dict(net_arch=[256, 256]))
 # Train the agent and display a progress bar
 model.learn(total_timesteps=int(400000), progress_bar=True, callback=eval_callback)
 # Save the agent
