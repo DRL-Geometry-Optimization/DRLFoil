@@ -15,7 +15,7 @@ class AirfoilEnv(gym.Env):
     def __init__(self, render_mode= None,
                  n_params = 15, scale_actions = 1, airfoil_seed = None, # Initial state of the environment
                  max_steps=50, reward_threshold=None, # Iterations control
-                 cl_reward=False, cl_reset = None, cl_maxreward=40, cl_wide=10, delta_reward=False, efficiency_param=1): # Reward control
+                 cl_reward=False, cl_reset = None, cl_maxreward=80, cl_wide=15, delta_reward=False, efficiency_param=1): # Reward control
 
         # state0 should have the following structure: [[UPPARAMETERS],[DOWNPARAMETERS],LE_weight]
 
