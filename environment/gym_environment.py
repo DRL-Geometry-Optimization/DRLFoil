@@ -21,7 +21,7 @@ class AirfoilEnv(gym.Env):
                  n_params : int = 15, scale_actions : float = 1, airfoil_seed : np.ndarray = None, # Initial state of the environment
                  cl_reward : bool = False, cl_reset : float = None, cl_maxreward : float = 80, cl_wide : float = 15, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
-                 efficiency_param : float = 1): # Efficiency weight parameter
+                 efficiency_param : float = 2): # Efficiency weight parameter
         
         """
         Initialize the environment with the following parameters:

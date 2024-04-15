@@ -1,6 +1,6 @@
 import numpy as np
 
-def reward(efficiency, efficiency_param=1, 
+def reward(efficiency, efficiency_param=2, 
            cl_reward = False, cl = None, cl_target = None, cl_maxreward = 80, cl_wide = 15, 
            delta_reward = False, last_efficiency = None):
     # Delta Reward True
