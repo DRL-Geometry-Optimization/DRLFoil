@@ -10,14 +10,35 @@ from .reward import reward
 
 
 class AirfoilEnv(gym.Env):
+    """
+    Airfoil environment for reinforcement learning. 
+    The environment is based on the airfoiltools class from the parametrization module.
+    """
+
     metadata = {'render_modes': ["human", "no_display"], "render_fps": 2 }
 
-    def __init__(self, render_mode= None,
-                 n_params = 15, scale_actions = 1, airfoil_seed = None, # Initial state of the environment
-                 max_steps=50, reward_threshold=None, # Iterations control
-                 cl_reward=False, cl_reset = None, cl_maxreward=80, cl_wide=15, delta_reward=False, efficiency_param=1): # Reward control
-
-        # state0 should have the following structure: [[UPPARAMETERS],[DOWNPARAMETERS],LE_weight]
+    def __init__(self, render_mode : bool = None, max_steps : int = 50, reward_threshold : bool = None, # Environment parameters
+                 n_params : int = 15, scale_actions : float = 1, airfoil_seed : np.ndarray = None, # Initial state of the environment
+                 cl_reward : bool = False, cl_reset : float = None, cl_maxreward : float = 80, cl_wide : float = 15, # Cl reward parameters
+                 delta_reward : bool = False, # Activate the delta reward
+                 efficiency_param : float = 1): # Efficiency weight parameter
+        
+        """
+        Initialize the environment with the following parameters:
+        - render_mode: The mode of rendering the environment. It can be "human" or "no_display".
+        - max_steps: The maximum number of steps in the environment.
+        - reward_threshold: The threshold for the reward. If the efficiency is above this threshold, the episode is done.
+        - n_params: The number of parameters in one side of the airfoil.
+        - scale_actions: The scaling factor for the actions. It is used because action space is normalized between -1 and 1.
+        - airfoil_seed: The initial seed for the airfoil. If it is None, the airfoil is randomly generated.
+        airfoil seed should have the following structure: [upper_weights, lower_weights, leading_edge_weight]
+        - cl_reward: If True, the reward is also based on the Cl value of the airfoil.
+        - cl_reset: The fixed Cl target for the airfoil. If it is None, the Cl target is randomly generated on every reset.
+        - cl_maxreward: The maximum reward for the Cl bell function.
+        - cl_wide: The width of the bell function for the Cl reward.
+        - delta_reward: If True, the reward is based on the difference between the current efficiency and the last efficiency.
+        - efficiency_param: The weight of the efficiency in the reward function.
+        """
 
         
         # Input parameters
@@ -51,9 +72,9 @@ class AirfoilEnv(gym.Env):
 
         self.render_mode = render_mode
 
+
         # Spaces dict is not used since it means observations are from different types of data. MultiLayerInput 
         # of Stable Baselines 3 is not the most efficient way to handle this. 
-
         """self.observation_space = spaces.Dict({
             "upper": spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32),
             "lower": spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32),
@@ -85,15 +106,15 @@ class AirfoilEnv(gym.Env):
 
 
 
-    def _get_info(self):
-        # Return more information about the environment state (for debugging)
+    def _get_info(self) -> dict:
+        """
+        This method returns additional information about the environment state.
+        """
         return {"CL": self.state.get_cl, "efficiency": self.state.get_efficiency, "step": self.step_counter}
 
 
     def reset(self, seed=None, options=None):
-        """
-        This method resets the environment to the initial state.
-        """
+
         super().reset(seed=seed)
         # Reset the environment state 
         if self.airfoil_seed is not None:
@@ -133,18 +154,14 @@ class AirfoilEnv(gym.Env):
 
 
 
-    def step(self, action: np.ndarray):
-        """
-        This method takes an action and returns the new state, the reward, and whether the episode is done.
-        """
-
+    def step(self, action : np.ndarray):
 
         # Scale the action
         action = action * self.scale_actions
 
 
         # Update the state of the environment
-        self.state.modify_airfoil(action, n_params=self.n_params)
+        self.state.modify_airfoil(action)
 
         # Reward calculation
         if self.state.check_airfoil() == False: # If the airfoil is invalid (upper side is below the lower side)
