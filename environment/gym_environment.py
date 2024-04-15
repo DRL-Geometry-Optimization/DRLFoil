@@ -1,8 +1,7 @@
 import numpy as np
-import gym
-from gym import spaces
-#import gymnasium as gym
-#from gymnasium import spaces
+import gymnasium as gym
+from gymnasium import spaces
+import random
 
 from .parametrization import airfoiltools
 from .reward import reward
@@ -16,19 +15,23 @@ class AirfoilEnv(gym.Env):
     def __init__(self, render_mode= None,
                  n_params = 15, scale_actions = 1, airfoil_seed = None, # Initial state of the environment
                  max_steps=50, reward_threshold=None, # Iterations control
-                 cl_reward=False, cl_target=None, cl_maxreward=40, cl_wide=15, delta_reward=False, efficiency_param=1): # Reward control
+                 cl_reward=False, cl_reset = None, cl_maxreward=40, cl_wide=10, delta_reward=False, efficiency_param=1): # Reward control
 
         # state0 should have the following structure: [[UPPARAMETERS],[DOWNPARAMETERS],LE_weight]
-
-        # NOTE: IF CL_TARGET IS ACTIVATED, THE NEURAL NETWORK SHOULD HAVE THE CL TARGET AS INPUT
-        # NOTE: s0 SHOULD BE USED ON RESET METHOD TO RESET THE ENVIRONMENT TO THE INITIAL STATE
 
         
         # Input parameters
         self.max_steps = max_steps
         self.efficiency_th = reward_threshold
         self.cl_reward = cl_reward
-        self.cl_target = cl_target
+
+        self.cl_reset = cl_reset
+
+        if cl_reward == True and self.cl_reset is not None:
+            self.cl_target = self.cl_reset # Cl target is fixed
+        else:
+            self.cl_target = None # Placeholder for the cl target that will be randomly generated in the reset method
+
         self.cl_maxreward = cl_maxreward
         self.cl_wide = cl_wide
         self.delta_reward = delta_reward
@@ -37,37 +40,49 @@ class AirfoilEnv(gym.Env):
         self.airfoil_seed = airfoil_seed
 
         # Create the airfoil object
-        self.state = airfoiltools() # Create an airfoil object
+        self.state = airfoiltools() 
         self.n_params = n_params # Number of parameters in one side of the airfoil
 
         # Initialize the environment state
-        self.done = False # The episode is not done by default 
+        self.done = False 
         self.step_counter = 0
         self.reward = 0
         self.last_efficiency = None # Placeholder for the last efficiency value
 
         self.render_mode = render_mode
 
+        # Spaces dict is not used since it means observations are from different types of data. MultiLayerInput 
+        # of Stable Baselines 3 is not the most efficient way to handle this. 
 
-        # Since different problems with action and observation spaces, box spaces are used
-        """higher_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32)
-        lower_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32)
-        le_action_space = spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
+        """self.observation_space = spaces.Dict({
+            "upper": spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32),
+            "lower": spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32),
+            "le": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32)
+        })"""
 
-        self.action_space = spaces.Tuple((higher_action_space, lower_action_space, le_action_space))
+        """self.action_space = spaces.Dict({
+            "upper": spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32),
+            "lower": spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32),
+            "le": spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
+        })"""
 
-        #self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
-        
-        # The observation space is the airfoil
-        higher_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32)
-        lower_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32)
-        le_obs_space = spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32)
+        # Actions: 
+        # 1. Upper side parameters
+        # 2. Lower side parameters
+        # 3. Leading edge weight
+        # 4. Cl target (if activated)
 
-        self.observation_space = spaces.Tuple((higher_obs_space, lower_obs_space, le_obs_space))"""
+        # space is the weights of the airfoil, the leading edge weight and the cl target (if activated)
+        if cl_reward == True:
+            space = 2*self.n_params + 2
+        else:
+            space = 2*self.n_params + 1
 
+        # The actions will be everytime the weights of the airfoil. Cl target is not going to be modified
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
+        # The observations will be the weights of the airfoil, the leading edge weight and the cl target (if activated)
+        self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(space,), dtype=np.float32)
 
-        self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params+1,), dtype=np.float32)
 
 
     def _get_info(self):
@@ -75,7 +90,7 @@ class AirfoilEnv(gym.Env):
         return {"CL": self.state.get_cl, "efficiency": self.state.get_efficiency, "step": self.step_counter}
 
 
-    def reset(self, seed=None, airfoil=None, options=None):
+    def reset(self, seed=None, options=None):
         """
         This method resets the environment to the initial state.
         """
@@ -89,9 +104,23 @@ class AirfoilEnv(gym.Env):
         self.done = False
         self.step_counter = 0
 
+        if self.cl_reward == True and self.cl_reset is None:
+            self.cl_target = random.uniform(0.1, 1.1)
+
+
         upper, lower, le = self.state.get_weights()
-        observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
-        #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
+
+        if self.cl_reward == True:
+            observation = np.array(upper + lower + le + [self.cl_target], dtype=np.float32)
+        else:
+            observation = np.array(upper + lower + le, dtype=np.float32)
+
+
+        """observation = {
+            "upper": np.array(upper, dtype=np.float32),
+            "lower": np.array(lower, dtype=np.float32),
+            "le": np.array(le, dtype=np.float32)
+        }"""
 
         self.state.analysis() # Analyze the airfoil
         self.last_efficiency = self.state.get_efficiency()
@@ -109,9 +138,6 @@ class AirfoilEnv(gym.Env):
         This method takes an action and returns the new state, the reward, and whether the episode is done.
         """
 
-        """if self.step_counter <= 0:
-            self.state.analysis()
-            self.last_efficiency = self.state.get_efficiency()"""
 
         # Scale the action
         action = action * self.scale_actions
@@ -153,8 +179,12 @@ class AirfoilEnv(gym.Env):
             self.done = True
 
         upper, lower, le = self.state.get_weights()
-        observation = np.array(upper + lower+ le, dtype=np.float32) # In case of using Box observation space
-        #observation = np.array(upper, dtype=np.float32), np.array(lower, dtype=np.float32), np.array(le, dtype=np.float32) # In case of using Tuple observation space
+        
+
+        if self.cl_reward == True:
+            observation = np.array(upper + lower + le + [self.cl_target], dtype=np.float32)
+        else:
+            observation = np.array(upper + lower + le, dtype=np.float32)
 
         #self.state.airfoil_plot() # Plot the airfoil
 

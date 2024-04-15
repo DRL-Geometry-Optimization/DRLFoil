@@ -1,7 +1,7 @@
 import environment
 from environment.parametrization import airfoiltools
 
-import gym
+import gymnasium as gym
 import numpy as np
 import os
 
