@@ -24,7 +24,7 @@ def make_env(env_id: str, rank: int, seed: int = 0):
     """
     def _init():
         env = gym.make('AirfoilEnv-v0', n_params=10, max_steps=10, scale_actions = 0.35, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0],
-                       delta_reward=False, cl_reward = True, cl_reset = None, efficiency_param = 1, cl_wide = 20)
+                       delta_reward=True, cl_reward = True, cl_reset = None, efficiency_param = 1, cl_wide = 20)
         env.reset(seed=seed + rank)
         return env
     set_random_seed(seed)
@@ -58,5 +58,5 @@ if __name__ == "__main__":
     # Train the agent and display a progress bar
     model.learn(total_timesteps=int(1400000), progress_bar=True, callback=eval_callback)
     # Save the agent
-    model.save("16042024_NewRewardCl_3_MultiEnv_1400000")
+    model.save("16042024_NewRewardCl_4_DeltaReward")
     #del model  # delete trained model to demonstrate loading"
