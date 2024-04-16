@@ -13,8 +13,11 @@ def reward(efficiency : float, efficiency_param : float = 0.5,
                 raise TypeError("Reward could not be calculated. The value of Last Efficiency was not introduced and Delta Reward is activated")
         # Cl target True
         else:
-            print("Warning: cl_target or cd_target = True was not defined yet as a reward function. Returning delta efficiency as reward")
-            return (efficiency - last_efficiency)*efficiency_param
+            try:
+                delta_Cl = cl - cl_target
+                return (efficiency - last_efficiency)*efficiency_param*np.exp(-cl_wide*(delta_Cl)**2)
+            except:
+                raise TypeError("Reward could not be calculated. The value of Last Efficiency was not introduced and Delta Reward is activated")
         
 
     # Delta Reward False
@@ -23,7 +26,6 @@ def reward(efficiency : float, efficiency_param : float = 0.5,
         if cl_reward == False:
             return efficiency_param*efficiency
         # Cl target True
-        # NOTE: IF CL_TARGET IS ACTIVATED, THE NEURAL NETWORK SHOULD HAVE THE CL TARGET AS INPUT
         else:
             delta_Cl = cl - cl_target
             return efficiency_param*efficiency*np.exp(-cl_wide*(delta_Cl)**2)
