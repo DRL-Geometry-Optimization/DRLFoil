@@ -19,9 +19,9 @@ class AirfoilEnv(gym.Env):
 
     def __init__(self, render_mode : bool = None, max_steps : int = 50, reward_threshold : bool = None, # Environment parameters
                  n_params : int = 15, scale_actions : float = 1, airfoil_seed : np.ndarray = None, # Initial state of the environment
-                 cl_reward : bool = False, cl_reset : float = None, cl_maxreward : float = 80, cl_wide : float = 15, # Cl reward parameters
+                 cl_reward : bool = False, cl_reset : float = None, cl_wide : float = 8, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
-                 efficiency_param : float = 2): # Efficiency weight parameter
+                 efficiency_param : float = 0.5): # Efficiency weight parameter
         
         """
         Initialize the environment with the following parameters:
@@ -53,7 +53,6 @@ class AirfoilEnv(gym.Env):
         else:
             self.cl_target = None # Placeholder for the cl target that will be randomly generated in the reset method
 
-        self.cl_maxreward = cl_maxreward
         self.cl_wide = cl_wide
         self.delta_reward = delta_reward
         self.efficiency_param = efficiency_param
@@ -176,8 +175,7 @@ class AirfoilEnv(gym.Env):
                                 last_efficiency=self.last_efficiency,
                                 cl_reward=self.cl_reward,
                                 cl=self.state.get_cl(),
-                                cl_target=self.cl_target, 
-                                cl_maxreward=self.cl_maxreward, 
+                                cl_target=self.cl_target,  
                                 cl_wide=self.cl_wide, 
                                 delta_reward=self.delta_reward)
             # Since last efficiency is going to be updated, the last efficiency output is saved
