@@ -5,7 +5,7 @@ import numpy as np
 
 # Create the environment
 env = gym.make('AirfoilEnv-v0', n_params=15, max_steps=4, scale_actions= 1, airfoil_seed=[0.1*np.ones(15), -0.1*np.ones(15), 0.0],
-               delta_reward=False, cl_reward = True, cl_reset = 0.5,
+               delta_reward=True, cl_reward = True, cl_reset = 0.5,
                render_mode="human")
 
 # Reset the environment
