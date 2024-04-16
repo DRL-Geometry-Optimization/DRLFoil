@@ -125,7 +125,7 @@ class AirfoilEnv(gym.Env):
         self.step_counter = 0
 
         if self.cl_reward == True and self.cl_reset is None:
-            self.cl_target = random.uniform(0.1, 1.1)
+            self.cl_target = random.uniform(0.1, 1.2)
 
 
         upper, lower, le = self.state.get_weights()
