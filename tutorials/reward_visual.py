@@ -8,7 +8,7 @@ alpha = 1 # Pendiente de la eficiencia
 
 # Coeficientes de delta Cl
 beta = 40 # Alto de la campana
-gamma = 6 # Ancho de la campana
+gamma = 20 # Ancho de la campana
 
 
 # Definir los rangos de E (eficiencia) y |ΔCl| (desviación del Cl)
