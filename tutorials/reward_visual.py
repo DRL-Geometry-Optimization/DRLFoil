@@ -8,7 +8,7 @@ alpha = 1 # Pendiente de la eficiencia
 
 # Coeficientes de delta Cl
 beta = 40 # Alto de la campana
-gamma = 15 # Ancho de la campana
+gamma = 6 # Ancho de la campana
 
 
 # Definir los rangos de E (eficiencia) y |ΔCl| (desviación del Cl)
@@ -44,7 +44,7 @@ plt.show()
 
 
 # OTRA OPCION DE REWARD
-alpha2 = 0.1
+alpha2 = 1
 
 R2 = alpha2 * E * np.exp(-gamma * (delta_Cl)**2)
 
