@@ -5,6 +5,7 @@ import random
 
 from .parametrization import airfoiltools
 from .reward import reward
+from .restriction import BoxRestriction
 
 # Tutorial: https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 
@@ -19,6 +20,7 @@ class AirfoilEnv(gym.Env):
 
     def __init__(self, render_mode : bool = None, max_steps : int = 50, reward_threshold : bool = None, # Environment parameters
                  n_params : int = 15, scale_actions : float = 1, airfoil_seed : np.ndarray = None, # Initial state of the environment
+                 num_boxes : int = 1, # Number of restriction boxes
                  cl_reward : bool = False, cl_reset : float = None, cl_wide : float = 8, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
                  efficiency_param : float = 0.5): # Efficiency weight parameter
@@ -119,7 +121,11 @@ class AirfoilEnv(gym.Env):
         if self.airfoil_seed is not None:
             self.state.kulfan(upper_weights=self.airfoil_seed[0], lower_weights=self.airfoil_seed[1], leading_edge_weight=self.airfoil_seed[2])
         else:
+            raise NotImplementedError("Due to a mistake, it is necessary to implement the airfoil_seed parameter in the reset method. random kulfan needs an airfoil declaration first")
             self.state.random_kulfan2(n_params= self.n_params)
+
+        self.state.boxes = [] # Reset the boxes
+        self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.15))
 
         self.done = False
         self.step_counter = 0
@@ -127,7 +133,7 @@ class AirfoilEnv(gym.Env):
         if self.cl_reward == True and self.cl_reset is None:
             self.cl_target = random.uniform(0.1, 1.2)
 
-
+        print(f"aaaaaaaaaaaaaaaaaa: {self.state.return_boxes()[0]}")
         upper, lower, le = self.state.get_weights()
 
         if self.cl_reward == True:
