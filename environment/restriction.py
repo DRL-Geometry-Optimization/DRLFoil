@@ -8,9 +8,9 @@ class BoxRestriction:
     """
 
     _XMIN = 0.1
-    _XMAX = 0.9
-    _YMIN = -0.4
-    _YMAX = 0.4
+    _XMAX = 0.8
+    _YMIN = -0.3
+    _YMAX = 0.3
 
     def __init__(self, posx : float, posy : float, width : float, height : float) -> None:
         """
@@ -27,6 +27,16 @@ class BoxRestriction:
             Height of the box. It must be positive.
         """
 
+        # Check if the box is valid        
+        if not isinstance(posx, (int, float)) or not isinstance(posy, (int, float)):
+            raise ValueError("Position must be a number")
+        
+        if not isinstance(width, (int, float)) or not isinstance(height, (int, float)):
+            raise ValueError("Width and height must be numbers")
+        
+        if width <= 0 or height <= 0:
+            raise ValueError("Width and height must be positive")      
+
         # Characteristics of the box
         self.posx = posx
         self.posy = posy
@@ -39,23 +49,11 @@ class BoxRestriction:
         self.y1 = posy - height/2
         self.y2 = posy + height/2
 
-        # Check if the box is valid
-        if width <= 0 or height <= 0:
-            raise ValueError("Width and height must be positive")
-        
-        if not isinstance(posx, (int, float)) or not isinstance(posy, (int, float)):
-            raise ValueError("Position must be a number")
-        
-        if not isinstance(width, (int, float)) or not isinstance(height, (int, float)):
-            raise ValueError("Width and height must be numbers")
-        
         if self.coordinates()[0][0] < self._XMIN or self.coordinates()[1][0] > self._XMAX:
-            raise ValueError("Box is out of the environment. It must be between 0 and 1 in x axis")
+            raise ValueError(f"Box is out of the environment. It must be between {self._XMIN} and {self._XMAX} in x axis")
         
         if self.coordinates()[0][1] > self._YMAX or self.coordinates()[2][1] < self._YMIN:
-            raise ValueError("Box is out of the environment. It must be between -0.4 and 0.4 in y axis")        
-
-
+            raise ValueError(f"Box is out of the environment. It must be between {self._YMIN} and {self._YMAX} in y axis")  
 
     def __str__(self) -> str:
         """
@@ -84,7 +82,8 @@ class BoxRestriction:
         else:
             raise IndexError("Index out of range. It must be between 0 and 3")
     
-
+    def box_params(self):
+        pass
 
     def coordinates(self) -> tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]]:
         """
@@ -216,10 +215,13 @@ def plot_boxes(*boxes : BoxRestriction) -> None:
 
 
 if __name__ == "__main__":
-    for _ in range(5):
-        pedro = BoxRestriction.random_box(xmin = 0.1, xmax=0.9, ymin = -0.2, ymax= 0.2)
-        pedro.plot()
-    plt.show()
+    # Test of the BoxRestriction class
+    pedro = BoxRestriction(0.6, 0.2, 0.3, 0.1)
+    print(pedro)
+    print(pedro.coordinates())
+    print(pedro[0])
+    print(pedro.is_inside(0.75, 0.2))
+    pedro.plot(show=True)
 
     #plot_boxes(pedro)
 
