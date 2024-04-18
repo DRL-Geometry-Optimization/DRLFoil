@@ -5,6 +5,7 @@ import aerosandbox.tools.pretty_plots as p
 import neuralfoil as nf
 import time
 import random
+from .restriction import BoxRestriction
 
 
 
@@ -22,6 +23,7 @@ class airfoiltools:
         self.airfoil = None # Placeholder for the airfoil object
         self.aerodynamics = None # Placeholder for the aerodynamics of the airfoil 
         self.numparams = None # Placeholder for the number of parameters on each face
+        self.boxes = [] # Placeholder for the box restriction
 
 
     @property
@@ -238,11 +240,13 @@ class airfoiltools:
             raise ValueError(f"An unexpected error occurred while obtaining efficiency: {e}")
         
 
-    def airfoil_plot(self):
+    def airfoil_plot(self, box: bool = True) -> None:
         """
         Plot the airfoil using the Matplotlib library.
         """
         fig, ax = plt.subplots(figsize=(6, 2))
+        for box in self.boxes:
+            box.plot()
         self.airfoil.draw()
 
 
@@ -282,6 +286,20 @@ class airfoiltools:
                     return False
             # If the airfoil is valid, return True    
             return True
+        
+    def get_boxes(self, *boxes) -> None:
+        for box in boxes:
+            if not isinstance(box, BoxRestriction):
+                raise TypeError("The box must be an instance of the BoxRestriction class")
+            self.boxes.append(box)
+
+    def return_boxes(self) -> list:
+        return_boxes = []
+        for box in self.boxes:
+            return_boxes.append([box.posx, box.posy, box.width, box.height])
+        return return_boxes
+    
+
 
 
 
@@ -289,25 +307,6 @@ class airfoiltools:
 
 
 if __name__ == "__main__": #This will only run if the script is run directly, not imported
-    # Test the airfoiltools class
-    pedro = airfoiltools()
-    pedro.random_kulfan2(15, 0., 0.3, 0.1)
-    pedro.analysis()
-    pedro.airfoil_plot()
-    #print(pedro.get_cl())
-    #print(pedro.get_cd())
-    #print(pedro.get_efficiency())
-
-    upper, lower, lew = pedro.get_weights()
-    print(upper, lower, lew)
-
-    #pedro.modify_airfoil([np.ones(15)*0.1, np.ones(15)*0.1, 0.1])
-    
-    pedro.analysis()
-    pedro.airfoil_plot()
-
-    print(pedro.upper_weights)
-    print(pedro.lower_weights)
-    #print(pedro.get_cl())
-    #print(pedro.get_cd())
-    #print(pedro.get_efficiency())
+    prueba = airfoiltools()
+    prueba.get_boxes(BoxRestriction(0, 0, 0.3, 0.2))
+    print(prueba.boxes)
