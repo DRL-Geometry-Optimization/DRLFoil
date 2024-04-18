@@ -66,6 +66,13 @@ class BoxRestriction:
 
 
     def __getitem__(self, key : int) -> float:
+        """
+        Items:
+        0 : posx
+        1 : posy
+        2 : width
+        3 : height
+        """
         if key == 0:
             return self.posx
         elif key == 1:
@@ -82,6 +89,10 @@ class BoxRestriction:
     def coordinates(self) -> tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]]:
         """
         Returns the coordinates of the box in the form of a tuple of (x,y).
+        0: up_left
+        1: up_right
+        2: down_left
+        3: down_right
         """
         up_left = (self.posx - self.width/2, self.posy + self.height/2)
         up_right = (self.posx + self.width/2, self.posy + self.height/2)
@@ -111,6 +122,15 @@ class BoxRestriction:
 
 
     def is_inside(self, x : float, y : float) -> bool:
+        """
+        Checks if a point is inside the box.
+
+        Args:
+        x : float
+            x coordinate of the point.
+        y : float
+            y coordinate of the point.
+        """
         return self.x1 <= x <= self.x2 and self.y1 <= y <= self.y2
     
 
@@ -120,6 +140,25 @@ class BoxRestriction:
                    ymin : float = None, ymax : float = None,
                    widthmax : float = None, heightmax : float = None,
                    y_simmetrical : bool = True) -> 'BoxRestriction':
+        """
+        Creates a random box.
+
+        Args:
+        xmin : float
+            Minimum x position of the box. Default is 0.1.
+        xmax : float
+            Maximum x position of the box. Default is 0.9.
+        ymin : float
+            Minimum y position of the box. Default is -0.2.
+        ymax : float
+            Maximum y position of the box. Default is 0.2.
+        widthmax : float
+            Maximum width of the box. Default is xmax - xmin.
+        heightmax : float
+            Maximum height of the box. Default is ymax - ymin.
+        y_simmetrical : bool
+            If True, the box will be in the middle of the y axis. Default is True.
+        """
 
         # Set the mins and maxs with defaults values if they are None
         if xmin is None:
