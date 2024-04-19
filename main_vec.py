@@ -37,7 +37,7 @@ num_cpu = 10  # Number of processes to use
 env_id = 'AirfoilEnv-v0'
 
 net_arch = [256, 256]
-total_timesteps = 100
+total_timesteps = 2000000
 ############################ HYPERPARAMETERS #####################################
 
 
