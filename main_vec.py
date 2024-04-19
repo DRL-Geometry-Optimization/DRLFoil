@@ -23,7 +23,7 @@ def make_env(env_id: str, rank: int, seed: int = 0):
     :param rank: index of the subprocess
     """
     def _init():
-        env = gym.make('AirfoilEnv-v0', n_params=10, max_steps=10, scale_actions = 0.35, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0],
+        env = gym.make('AirfoilEnv-v0', n_params=10, max_steps=15, scale_actions = 0.35, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0],
                        delta_reward=False, cl_reward = True, cl_reset = None, efficiency_param = 1, cl_wide = 20)
         env.reset(seed=seed + rank)
         return env
@@ -54,9 +54,9 @@ if __name__ == "__main__":
 
 
     # Instantiate the agent
-    model = PPO("MlpPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=[256, 256]))
+    model = PPO("MlpPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=[512, 512, 256]))
     # Train the agent and display a progress bar
     model.learn(total_timesteps=int(2000000), progress_bar=True, callback=eval_callback)
     # Save the agent
-    model.save("19042024_Restriction_1")
+    model.save("19042024_Restriction_1_512_512_256")
     #del model  # delete trained model to demonstrate loading"
