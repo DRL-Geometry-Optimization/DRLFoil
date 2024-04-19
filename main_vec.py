@@ -23,7 +23,7 @@ def make_env(env_id: str, rank: int, seed: int = 0):
     :param rank: index of the subprocess
     """
     def _init():
-        env = gym.make('AirfoilEnv-v0', n_params=10, max_steps=15, scale_actions = 0.35, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0],
+        env = gym.make('AirfoilEnv-v0', n_params=10, max_steps=20, scale_actions = 0.25, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0],
                        delta_reward=False, cl_reward = True, cl_reset = None, efficiency_param = 1, cl_wide = 20)
         env.reset(seed=seed + rank)
         return env
