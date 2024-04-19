@@ -1,2 +1,0 @@
-Actualmente se han unificado tanto las acciones como las observaciones en una lista, ya que hacer una tupla estaba dando problemas.
-Lo unico que hace falta para volver a convertirlo en tupla es descomentar los espacios de observacion y accion, que son lo que estaba dando problemas.
