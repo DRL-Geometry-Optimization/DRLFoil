@@ -281,9 +281,13 @@ class airfoiltools:
                     if up[-i-1][1] - low[i][1] < 0.01:
                         return False
                     
-                    
                 if i == 1 and low[i][1] > 0.008: # Check if the airfoil is like the nose of a bird
                     return False
+                
+                for box in self.boxes:
+                    if box.is_bad(x = up[-i-1][0], y = up[-i-1][1], face = "up") or box.is_bad(x = low[i][0], y = low[i][1], face = "low"):
+                        return False
+
             # If the airfoil is valid, return True    
             return True
         
