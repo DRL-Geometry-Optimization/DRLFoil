@@ -17,7 +17,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "ClReward_NoDelta_Wide20_3"
+name = "Restriction_MicroSteps_512_512"
 ############################### MODEL NAME ########################################
 
 
