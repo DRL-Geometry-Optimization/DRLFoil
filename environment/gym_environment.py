@@ -126,7 +126,7 @@ class AirfoilEnv(gym.Env):
             self.state.random_kulfan2(n_params= self.n_params)
 
         self.state.boxes = [] # Reset the boxes
-        self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.15))
+        self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
 
         self.done = False
         self.step_counter = 0
