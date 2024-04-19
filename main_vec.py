@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
 
     env_id = 'AirfoilEnv-v0'
-    num_cpu = 10  # Number of processes to use
+    num_cpu = 20  # Number of processes to use
 
 
     vec_env = SubprocVecEnv([make_env(env_id, i) for i in range(num_cpu)])
