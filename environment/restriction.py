@@ -132,6 +132,22 @@ class BoxRestriction:
         """
         return self.x1 <= x <= self.x2 and self.y1 <= y <= self.y2
     
+    def is_bad(self, x : float, y : float, face: str) -> bool:
+        """
+        Checks if a point of the airfoil is not correctly possitioned with respect to the restriction box
+
+        Args:
+        x : float
+            x coordinate of the point.
+        y : float
+            y coordinate of the point.
+        """
+        if face == "up":
+            return self.x1 <= x <= self.x2 and y <= self.y2
+        
+        if face == "low":
+            return self.x1 <= x <= self.x2 and self.y1 <= y
+    
 
 
     @classmethod
