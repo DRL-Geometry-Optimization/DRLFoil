@@ -48,7 +48,7 @@ MODEL_NAME = f"{formatted_date}_{name}"
 # Model directory
 MODEL_DIR = f"./models/{formatted_date}/{MODEL_NAME}"
 # Log directory
-LOG_DIR = f"./eval_logs/{formatted_date}/{MODEL_NAME}"
+LOG_DIR = f"{MODEL_DIR}/logs"
 # Tensorboard directory
 #TENSORBOARD_DIR = f"./logs/tensorboard_logs/{formatted_date}/"
 
@@ -83,7 +83,10 @@ def make_env(env_id: str, rank: int, seed: int = 0):
 
 if __name__ == "__main__":
     # Create log directories
+    os.makedirs(MODEL_DIR, exist_ok=False)
     os.makedirs(LOG_DIR, exist_ok=False)
+
+    
 
 
     # Create log for the logs directory
@@ -112,17 +115,10 @@ if __name__ == "__main__":
 
     # Instantiate the agent
     model = PPO("MlpPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch),
-                tensorboard_log=LOG_DIR)
+                tensorboard_log=MODEL_DIR)
     # Train the agent and display a progress bar
-    model.learn(total_timesteps=total_timesteps, progress_bar=True, callback=eval_callback, tb_log_name="Tensorboard")
+    model.learn(total_timesteps=total_timesteps, progress_bar=True, callback=eval_callback, tb_log_name="TB_LOG")
     # Save the agent
-    os.makedirs(MODEL_DIR, exist_ok=False)
+    
     model.save(f"{MODEL_DIR}/{MODEL_NAME}")
-
-    # Create log for the models directory
-    create_log(name=MODEL_NAME, dir=MODEL_DIR,
-               n_params=n_params, max_steps=max_steps, scale_actions=scale_actions,
-               airfoil_seed=airfoil_seed, delta_reward=delta_reward, cl_reward=cl_reward,
-               cl_reset=cl_reset, efficiency_param=efficiency_param, cl_wide=cl_wide,
-               num_cpu=num_cpu, net_arch=net_arch, total_timesteps=total_timesteps)
     
