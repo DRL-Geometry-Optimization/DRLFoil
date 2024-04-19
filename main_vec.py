@@ -12,6 +12,20 @@ from stable_baselines3.common.callbacks import EvalCallback
 
 from stable_baselines3.common.utils import set_random_seed
 
+from datetime import date
+
+today = date.today()
+formatted_date = today.strftime("%d%m%y")
+
+# tensorboard --logdir .\logs\tensorboard_logs\FECHA\MODELO
+
+############################### MODEL NAME ########################################
+MODEL_NAME = f"{formatted_date}_ClReward_NoDelta_Wide20"
+############################### MODEL NAME ########################################
+
+LOG_DIR = f"./logs/eval_logs/{formatted_date}/{MODEL_NAME}"
+TENSORBOARD_DIR = f"./logs/tensorboard_logs/{formatted_date}/"
+
 
 def make_env(env_id: str, rank: int, seed: int = 0):
     """
@@ -24,7 +38,7 @@ def make_env(env_id: str, rank: int, seed: int = 0):
     """
     def _init():
         env = gym.make('AirfoilEnv-v0', n_params=10, max_steps=10, scale_actions = 0.35, airfoil_seed = [0.1*np.ones(10), -0.1*np.ones(10), 0.0],
-                       delta_reward=True, cl_reward = True, cl_reset = None, efficiency_param = 1, cl_wide = 20)
+                       delta_reward=False, cl_reward = True, cl_reset = None, efficiency_param = 1, cl_wide = 20)
         env.reset(seed=seed + rank)
         return env
     set_random_seed(seed)
@@ -33,8 +47,7 @@ def make_env(env_id: str, rank: int, seed: int = 0):
 
 
 if __name__ == "__main__":
-    eval_log_dir = "./eval_logs/"
-    os.makedirs(eval_log_dir, exist_ok=True)
+    os.makedirs(LOG_DIR, exist_ok=True)
 
 
     env_id = 'AirfoilEnv-v0'
@@ -47,16 +60,17 @@ if __name__ == "__main__":
     vec_env.reset()
     #env.render()
 
-    eval_callback = EvalCallback(vec_env, best_model_save_path=eval_log_dir,
-                                log_path=eval_log_dir, eval_freq=max(2000, 1),
+    eval_callback = EvalCallback(vec_env, best_model_save_path=LOG_DIR,
+                                log_path=LOG_DIR, eval_freq=max(2000, 1),
                                 n_eval_episodes=5, deterministic=False,
                                 render=False)
 
 
     # Instantiate the agent
-    model = PPO("MlpPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=[256, 256]))
+    model = PPO("MlpPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=[256, 256]),
+                tensorboard_log=TENSORBOARD_DIR)
     # Train the agent and display a progress bar
-    model.learn(total_timesteps=int(1400000), progress_bar=True, callback=eval_callback)
+    model.learn(total_timesteps=int(2000000), progress_bar=True, callback=eval_callback, tb_log_name=MODEL_NAME)
     # Save the agent
-    model.save("16042024_NewRewardCl_4_DeltaReward")
+    model.save(MODEL_NAME)
     #del model  # delete trained model to demonstrate loading"
