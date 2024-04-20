@@ -82,13 +82,13 @@ class AirfoilEnv(gym.Env):
         if cl_reward == True:
             self.observation_space = spaces.Dict({
                 "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
-                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._NUM_BOXES,), dtype=np.float32)
+                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._NUM_BOXES,), dtype=np.float32),
                 "cl_target": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32),
             })
         else:
             self.observation_space = spaces.Dict({
                 "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
-                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._NUM_BOXES,), dtype=np.float32)
+                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._NUM_BOXES,), dtype=np.float32),
             })
 
 
