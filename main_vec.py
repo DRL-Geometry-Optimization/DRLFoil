@@ -17,15 +17,15 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "Restriction_MicroSteps_512_512"
+name = "Restriction_MicroSteps_512_512_256"
 ############################### MODEL NAME ########################################
 
 
 
 ############################ HYPERPARAMETERS #####################################
 n_params = 10
-max_steps = 10
-scale_actions = 0.35
+max_steps = 25
+scale_actions = 0.15
 airfoil_seed = [0.1*np.ones(n_params), -0.1*np.ones(n_params), 0.0]
 delta_reward = False
 cl_reward = True
@@ -36,8 +36,8 @@ cl_wide = 20
 num_cpu = 10  # Number of processes to use
 env_id = 'AirfoilEnv-v0'
 
-net_arch = [256, 256]
-total_timesteps = 2000000
+net_arch = [512, 512, 256]
+total_timesteps = 1500000
 ############################ HYPERPARAMETERS #####################################
 
 
