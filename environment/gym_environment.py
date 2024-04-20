@@ -92,16 +92,7 @@ class AirfoilEnv(gym.Env):
             })
 
 
-        """# space is the weights of the airfoil, the leading edge weight and the cl target (if activated)
-        if cl_reward == True:
-            space = 2*self.n_params + 2 + 4*self._NUM_BOXES
-        else:
-            space = 2*self.n_params + 1 + 4*self._NUM_BOXES
-
-        # The actions will be everytime the weights of the airfoil. Cl target is not going to be modified
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
-        # The observations will be the weights of the airfoil, the leading edge weight and the cl target (if activated)
-        self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(space,), dtype=np.float32)"""
 
 
 
@@ -137,18 +128,17 @@ class AirfoilEnv(gym.Env):
         if len(self.state.boxes) != self._NUM_BOXES:
             raise NotImplementedError("For now, the number of boxes is fixed to 1")
 
+
+        observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
+
         if self.cl_reward == True:
-            observation = np.array(upper + lower + le + [self.cl_target] + self.state.return_boxes()[0], dtype=np.float32)
+            observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
+            observation["boxes"] = np.array(self.state.return_boxes()[0], dtype=np.float32)
 
         else:
-            observation = np.array(upper + lower + le + self.state.return_boxes()[0], dtype=np.float32)
+            observation["boxes"] = np.array(self.state.return_boxes()[0], dtype=np.float32)
 
 
-        """observation = {
-            "upper": np.array(upper, dtype=np.float32),
-            "lower": np.array(lower, dtype=np.float32),
-            "le": np.array(le, dtype=np.float32)
-        }"""
 
         self.state.analysis() # Analyze the airfoil
         self.last_efficiency = self.state.get_efficiency()
@@ -207,11 +197,14 @@ class AirfoilEnv(gym.Env):
         if len(self.state.boxes) != self._NUM_BOXES:
             raise NotImplementedError("For now, the number of boxes is fixed to 1")
 
+        observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
+
         if self.cl_reward == True:
-            observation = np.array(upper + lower + le + [self.cl_target] + self.state.return_boxes()[0], dtype=np.float32)
+            observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
+            observation["boxes"] = np.array(self.state.return_boxes()[0], dtype=np.float32)
 
         else:
-            observation = np.array(upper + lower + le + self.state.return_boxes()[0], dtype=np.float32)
+            observation["boxes"] = np.array(self.state.return_boxes()[0], dtype=np.float32)
 
         #self.state.airfoil_plot() # Plot the airfoil
 
