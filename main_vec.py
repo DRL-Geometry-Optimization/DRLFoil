@@ -17,14 +17,14 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "Restriction_MicroSteps_512_512_256"
+name = "GammaStudy_0.99"
 ############################### MODEL NAME ########################################
 
 
 
 ############################ HYPERPARAMETERS #####################################
 n_params = 10
-max_steps = 25
+max_steps = 10
 scale_actions = 0.15
 airfoil_seed = [0.1*np.ones(n_params), -0.1*np.ones(n_params), 0.0]
 delta_reward = False
@@ -33,11 +33,14 @@ cl_reset = None
 efficiency_param = 1
 cl_wide = 20
 
-num_cpu = 10  # Number of processes to use
+num_cpu = 12  # Number of processes to use
 env_id = 'AirfoilEnv-v0'
 
 net_arch = [512, 512, 256]
-total_timesteps = 1500000
+total_timesteps = 2000000
+
+
+gamma = 0.99
 ############################ HYPERPARAMETERS #####################################
 
 
@@ -107,15 +110,17 @@ if __name__ == "__main__":
     #env.render()
 
     eval_callback = EvalCallback(vec_env, best_model_save_path=LOG_DIR,
-                                log_path=LOG_DIR, eval_freq=max(2000, 1),
-                                n_eval_episodes=5, deterministic=False,
+                                log_path=LOG_DIR, eval_freq=10000,
+                                n_eval_episodes=7, deterministic=True,
                                 render=False)
 
-
+    #model = PPO.load("models/200424/200424_Restriction_MicroSteps_512_512_256_3M/logs/best_model", env=vec_env, tensorboard_log=MODEL_DIR)
 
     # Instantiate the agent
-    model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch),
-                tensorboard_log=MODEL_DIR)
+    model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch), tensorboard_log=MODEL_DIR, gamma=gamma)
+    
+
+
     # Train the agent and display a progress bar
     model.learn(total_timesteps=total_timesteps, progress_bar=True, callback=eval_callback, tb_log_name="TB_LOG")
     # Save the agent
