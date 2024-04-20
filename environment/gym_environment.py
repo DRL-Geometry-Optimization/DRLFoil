@@ -77,25 +77,22 @@ class AirfoilEnv(gym.Env):
 
         # Spaces dict is not used since it means observations are from different types of data. MultiLayerInput 
         # of Stable Baselines 3 is not the most efficient way to handle this. 
-        """self.observation_space = spaces.Dict({
-            "upper": spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32),
-            "lower": spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32),
-            "le": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32)
-        })"""
 
-        """self.action_space = spaces.Dict({
-            "upper": spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32),
-            "lower": spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32),
-            "le": spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
-        })"""
 
-        # Actions: 
-        # 1. Upper side parameters
-        # 2. Lower side parameters
-        # 3. Leading edge weight
-        # 4. Cl target (if activated)
+        if cl_reward == True:
+            self.observation_space = spaces.Dict({
+                "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
+                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._NUM_BOXES,), dtype=np.float32)
+                "cl_target": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32),
+            })
+        else:
+            self.observation_space = spaces.Dict({
+                "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
+                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._NUM_BOXES,), dtype=np.float32)
+            })
 
-        # space is the weights of the airfoil, the leading edge weight and the cl target (if activated)
+
+        """# space is the weights of the airfoil, the leading edge weight and the cl target (if activated)
         if cl_reward == True:
             space = 2*self.n_params + 2 + 4*self._NUM_BOXES
         else:
@@ -104,7 +101,7 @@ class AirfoilEnv(gym.Env):
         # The actions will be everytime the weights of the airfoil. Cl target is not going to be modified
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
         # The observations will be the weights of the airfoil, the leading edge weight and the cl target (if activated)
-        self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(space,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(space,), dtype=np.float32)"""
 
 
 
