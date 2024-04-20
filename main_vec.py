@@ -114,7 +114,7 @@ if __name__ == "__main__":
 
 
     # Instantiate the agent
-    model = PPO("MlpPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch),
+    model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch),
                 tensorboard_log=MODEL_DIR)
     # Train the agent and display a progress bar
     model.learn(total_timesteps=total_timesteps, progress_bar=True, callback=eval_callback, tb_log_name="TB_LOG")
