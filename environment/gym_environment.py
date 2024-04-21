@@ -16,15 +16,17 @@ class AirfoilEnv(gym.Env):
     The environment is based on the airfoiltools class from the parametrization module.
     """
 
-    _NUM_BOXES = 1
 
     metadata = {'render_modes': ["human", "no_display"], "render_fps": 2 }
+
+    _BOX_LIMIT = 1 # Maximum number of boxes in the airfoil
 
     def __init__(self, render_mode : bool = None, max_steps : int = 50, reward_threshold : bool = None, # Environment parameters
                  n_params : int = 15, scale_actions : float = 1, airfoil_seed : np.ndarray = None, # Initial state of the environment
                  cl_reward : bool = False, cl_reset : float = None, cl_wide : float = 8, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
-                 efficiency_param : float = 0.5): # Efficiency weight parameter
+                 efficiency_param : float = 0.5, # Efficiency weight parameter
+                 n_boxes : int = 1,): # Number of boxes in the airfoil
         
         """
         Initialize the environment with the following parameters:
@@ -74,6 +76,8 @@ class AirfoilEnv(gym.Env):
 
         self.render_mode = render_mode
 
+        self.n_boxes = n_boxes
+
 
         # Spaces dict is not used since it means observations are from different types of data. MultiLayerInput 
         # of Stable Baselines 3 is not the most efficient way to handle this. 
@@ -82,13 +86,13 @@ class AirfoilEnv(gym.Env):
         if cl_reward == True:
             self.observation_space = spaces.Dict({
                 "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
-                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._NUM_BOXES,), dtype=np.float32),
+                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
                 "cl_target": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32),
             })
         else:
             self.observation_space = spaces.Dict({
                 "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
-                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._NUM_BOXES,), dtype=np.float32),
+                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
             })
 
 
@@ -113,8 +117,24 @@ class AirfoilEnv(gym.Env):
             raise NotImplementedError("Due to a mistake, it is necessary to implement the airfoil_seed parameter in the reset method. random kulfan needs an airfoil declaration first")
             self.state.random_kulfan2(n_params= self.n_params)
 
+
+        # Box reset
         self.state.boxes = [] # Reset the boxes
-        self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
+
+        # Box creation
+        if self.n_boxes > self._BOX_LIMIT:
+            raise ValueError(f"The number of boxes is limited to {self._BOX_LIMIT}")
+        
+        if self.n_boxes == 1:
+            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
+            print(f"BOXEEEEEEEEEEEEES: {self.state.return_boxes()}")
+        if self.n_boxes == 2:
+            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
+                                                           xmax=0.5))
+            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
+                                                           xmin=0.5))
+
+
 
         self.done = False
         self.step_counter = 0
@@ -125,18 +145,24 @@ class AirfoilEnv(gym.Env):
 
         upper, lower, le = self.state.get_weights()
 
-        if len(self.state.boxes) != self._NUM_BOXES:
-            raise NotImplementedError("For now, the number of boxes is fixed to 1")
-
 
         observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
 
+        
+        # Since the neural network has to have a fixed input size, the boxes are padded with zeros equivalent to 3 boxes
+        boxes_obs = np.zeros(4*self._BOX_LIMIT, dtype=np.float32)
+
+        for i in range(self.n_boxes):
+            boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
+
+        observation["boxes"] = boxes_obs
+
+
         if self.cl_reward == True:
             observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
-            observation["boxes"] = np.array(self.state.return_boxes()[0], dtype=np.float32)
 
         else:
-            observation["boxes"] = np.array(self.state.return_boxes()[0], dtype=np.float32)
+            observation["cl_target"] = np.array([-1], dtype=np.float32)
 
 
 
@@ -194,17 +220,22 @@ class AirfoilEnv(gym.Env):
         upper, lower, le = self.state.get_weights()
         
 
-        if len(self.state.boxes) != self._NUM_BOXES:
-            raise NotImplementedError("For now, the number of boxes is fixed to 1")
-
         observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
 
         if self.cl_reward == True:
             observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
-            observation["boxes"] = np.array(self.state.return_boxes()[0], dtype=np.float32)
-
         else:
-            observation["boxes"] = np.array(self.state.return_boxes()[0], dtype=np.float32)
+            observation["cl_target"] = np.array([-1], dtype=np.float32)
+
+
+        # Since the neural network has to have a fixed input size, the boxes are padded with zeros equivalent to 3 boxes
+        boxes_obs = np.zeros(4*self._BOX_LIMIT, dtype=np.float32)
+
+        for i in range(self.n_boxes):
+            boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
+
+        observation["boxes"] = boxes_obs
+
 
         #self.state.airfoil_plot() # Plot the airfoil
 
