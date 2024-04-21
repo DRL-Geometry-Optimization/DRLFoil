@@ -17,7 +17,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "GammaStudy_0.99"
+name = "4M_LearningStudy_0.00024_Gamma0.99"
 ############################### MODEL NAME ########################################
 
 
@@ -37,10 +37,11 @@ num_cpu = 12  # Number of processes to use
 env_id = 'AirfoilEnv-v0'
 
 net_arch = [512, 512, 256]
-total_timesteps = 2000000
+total_timesteps = 4000000
 
 
 gamma = 0.99
+learning_rate = 0.00024
 ############################ HYPERPARAMETERS #####################################
 
 
@@ -97,7 +98,8 @@ if __name__ == "__main__":
                n_params=n_params, max_steps=max_steps, scale_actions=scale_actions,
                airfoil_seed=airfoil_seed, delta_reward=delta_reward, cl_reward=cl_reward,
                cl_reset=cl_reset, efficiency_param=efficiency_param, cl_wide=cl_wide,
-               num_cpu=num_cpu, net_arch=net_arch, total_timesteps=total_timesteps)
+               num_cpu=num_cpu, net_arch=net_arch, total_timesteps=total_timesteps,
+               gamma=gamma, learning_rate=learning_rate)
 
     
 
@@ -114,10 +116,11 @@ if __name__ == "__main__":
                                 n_eval_episodes=7, deterministic=True,
                                 render=False)
 
-    #model = PPO.load("models/200424/200424_Restriction_MicroSteps_512_512_256_3M/logs/best_model", env=vec_env, tensorboard_log=MODEL_DIR)
+    #model = PPO.load("models/210424/210424_LearningStudy_0.00025_Gamma0.99/logs/best_model", env=vec_env, tensorboard_log=MODEL_DIR)
 
     # Instantiate the agent
-    model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch), tensorboard_log=MODEL_DIR, gamma=gamma)
+    model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch), tensorboard_log=MODEL_DIR, 
+                gamma=gamma, learning_rate=learning_rate)
     
 
 
