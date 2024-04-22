@@ -33,7 +33,7 @@ cl_reset = None
 efficiency_param = 1
 cl_wide = 20
 
-num_cpu = 300  # Number of processes to use
+num_cpu = 60  # Number of processes to use
 env_id = 'AirfoilEnv-v0'
 
 net_arch = [512, 512, 256]
