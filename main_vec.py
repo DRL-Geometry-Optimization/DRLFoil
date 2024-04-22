@@ -17,7 +17,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "4M_LearningStudy_0.00024_Gamma0.99"
+name = "6M_LearningStudy_0.00021_Gamma0.99"
 ############################### MODEL NAME ########################################
 
 
@@ -33,15 +33,16 @@ cl_reset = None
 efficiency_param = 1
 cl_wide = 20
 
-num_cpu = 12  # Number of processes to use
+num_cpu = 14  # Number of processes to use
 env_id = 'AirfoilEnv-v0'
 
 net_arch = [512, 512, 256]
-total_timesteps = 4000000
+total_timesteps = 6000000
 
 
 gamma = 0.99
-learning_rate = 0.00024
+learning_rate = 0.00021
+ent_coef = 0.0
 ############################ HYPERPARAMETERS #####################################
 
 
@@ -120,7 +121,7 @@ if __name__ == "__main__":
 
     # Instantiate the agent
     model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch), tensorboard_log=MODEL_DIR, 
-                gamma=gamma, learning_rate=learning_rate)
+                gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef)
     
 
 
