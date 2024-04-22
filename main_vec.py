@@ -17,7 +17,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "6M_LearningStudy_0.00021_Gamma0.99"
+name = "2M_LearningStudy_0.001_Gamma0.99"
 ############################### MODEL NAME ########################################
 
 
