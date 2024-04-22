@@ -121,7 +121,8 @@ if __name__ == "__main__":
 
     # Instantiate the agent
     model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch), tensorboard_log=MODEL_DIR, 
-                gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef)
+                gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef,
+                device='cuda')
     
 
 
