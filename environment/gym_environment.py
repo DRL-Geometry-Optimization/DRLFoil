@@ -127,7 +127,6 @@ class AirfoilEnv(gym.Env):
         
         if self.n_boxes == 1:
             self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
-            print(f"BOXEEEEEEEEEEEEES: {self.state.return_boxes()}")
         if self.n_boxes == 2:
             self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
                                                            xmax=0.5))
