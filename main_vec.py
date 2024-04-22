@@ -33,15 +33,16 @@ cl_reset = None
 efficiency_param = 1
 cl_wide = 20
 
-num_cpu = 60  # Number of processes to use
+num_cpu = 12  # Number of processes to use
 env_id = 'AirfoilEnv-v0'
 
 net_arch = [512, 512, 256]
-total_timesteps = 6000000
+total_timesteps = 2000000
 
 
 gamma = 0.99
-learning_rate = 0.00021
+#learning_rate = 0.00021
+learning_rate = 0.001
 ent_coef = 0.0
 ############################ HYPERPARAMETERS #####################################
 
