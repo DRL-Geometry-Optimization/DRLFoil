@@ -5,6 +5,7 @@ import random
 
 from .parametrization import airfoiltools
 from .reward import reward
+from .restriction import BoxRestriction
 
 # Tutorial: https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 
@@ -15,13 +16,17 @@ class AirfoilEnv(gym.Env):
     The environment is based on the airfoiltools class from the parametrization module.
     """
 
+
     metadata = {'render_modes': ["human", "no_display"], "render_fps": 2 }
 
-    def __init__(self, render_mode : bool = None, max_steps : int = 50, reward_threshold : bool = None, # Environment parameters
-                 n_params : int = 15, scale_actions : float = 1, airfoil_seed : np.ndarray = None, # Initial state of the environment
-                 cl_reward : bool = False, cl_reset : float = None, cl_wide : float = 8, # Cl reward parameters
+    _BOX_LIMIT = 1 # Maximum number of boxes in the airfoil
+
+    def __init__(self, render_mode : bool = None, max_steps : int = 10, reward_threshold : bool = None, # Environment parameters
+                 n_params : int = 10, scale_actions : float = 0.15, airfoil_seed : np.ndarray = [0.1*np.ones(10), -0.1*np.ones(10), 0.0], # Initial state of the environment
+                 cl_reward : bool = True, cl_reset : float = None, cl_wide : float = 20, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
-                 efficiency_param : float = 0.5): # Efficiency weight parameter
+                 efficiency_param : float = 1, # Efficiency weight parameter
+                 n_boxes : int = 1,): # Number of boxes in the airfoil
         
         """
         Initialize the environment with the following parameters:
@@ -71,37 +76,41 @@ class AirfoilEnv(gym.Env):
 
         self.render_mode = render_mode
 
+        if n_boxes > self._BOX_LIMIT:
+            raise ValueError(f"The number of boxes is limited to {self._BOX_LIMIT}")
+        else:
+            self.n_boxes = n_boxes
+
 
         # Spaces dict is not used since it means observations are from different types of data. MultiLayerInput 
         # of Stable Baselines 3 is not the most efficient way to handle this. 
-        """self.observation_space = spaces.Dict({
-            "upper": spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32),
-            "lower": spaces.Box(low=-5.0, high=5.0, shape=(self.n_params,), dtype=np.float32),
-            "le": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32)
-        })"""
 
-        """self.action_space = spaces.Dict({
-            "upper": spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32),
-            "lower": spaces.Box(low=-1.0, high=1.0, shape=(self.n_params,), dtype=np.float32),
-            "le": spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
-        })"""
+        obs_dict = {} # Placeholder for the observation space
+        obs_dict["airfoil"] = spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32)
 
-        # Actions: 
-        # 1. Upper side parameters
-        # 2. Lower side parameters
-        # 3. Leading edge weight
-        # 4. Cl target (if activated)
+        if self.cl_reward == True:
+            obs_dict["cl_target"] = spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32)
 
-        # space is the weights of the airfoil, the leading edge weight and the cl target (if activated)
-        if cl_reward == True:
-            space = 2*self.n_params + 2
+        if self.n_boxes > 0:
+            obs_dict["boxes"] = spaces.Box(low=-5.0, high=5.0, shape=(4*self.n_boxes,), dtype=np.float32)
+
+        self.observation_space = spaces.Dict(obs_dict)
+
+
+        """if cl_reward == True:
+            self.observation_space = spaces.Dict({
+                "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
+                "boxes": spaces.Box(low=-2.0, high=2.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
+                "cl_target": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32),
+            })
         else:
-            space = 2*self.n_params + 1
+            self.observation_space = spaces.Dict({
+                "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
+                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
+            })"""
 
-        # The actions will be everytime the weights of the airfoil. Cl target is not going to be modified
+
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
-        # The observations will be the weights of the airfoil, the leading edge weight and the cl target (if activated)
-        self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(space,), dtype=np.float32)
 
 
 
@@ -119,7 +128,28 @@ class AirfoilEnv(gym.Env):
         if self.airfoil_seed is not None:
             self.state.kulfan(upper_weights=self.airfoil_seed[0], lower_weights=self.airfoil_seed[1], leading_edge_weight=self.airfoil_seed[2])
         else:
+            raise NotImplementedError("Due to a mistake, it is necessary to implement the airfoil_seed parameter in the reset method. random kulfan needs an airfoil declaration first")
             self.state.random_kulfan2(n_params= self.n_params)
+
+
+        # Box reset
+        self.state.boxes = [] # Reset the boxes
+
+        # Box creation
+        if self.n_boxes > self._BOX_LIMIT:
+            raise ValueError(f"The number of boxes is limited to {self._BOX_LIMIT}")
+        
+        if self.n_boxes == 0:
+            pass
+        elif self.n_boxes == 1:
+            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
+        elif self.n_boxes == 2:
+            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
+                                                           xmax=0.5))
+            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
+                                                           xmin=0.5))
+
+
 
         self.done = False
         self.step_counter = 0
@@ -130,17 +160,22 @@ class AirfoilEnv(gym.Env):
 
         upper, lower, le = self.state.get_weights()
 
+
+        observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
+
+        if self.n_boxes > 0:
+            boxes_obs = np.zeros(4*self.n_boxes, dtype=np.float32)
+
+            for i in range(self.n_boxes):
+                boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
+
+            observation["boxes"] = boxes_obs
+
+
         if self.cl_reward == True:
-            observation = np.array(upper + lower + le + [self.cl_target], dtype=np.float32)
-        else:
-            observation = np.array(upper + lower + le, dtype=np.float32)
+            observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
 
 
-        """observation = {
-            "upper": np.array(upper, dtype=np.float32),
-            "lower": np.array(lower, dtype=np.float32),
-            "le": np.array(le, dtype=np.float32)
-        }"""
 
         self.state.analysis() # Analyze the airfoil
         self.last_efficiency = self.state.get_efficiency()
@@ -196,10 +231,20 @@ class AirfoilEnv(gym.Env):
         upper, lower, le = self.state.get_weights()
         
 
+        observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
+
         if self.cl_reward == True:
-            observation = np.array(upper + lower + le + [self.cl_target], dtype=np.float32)
-        else:
-            observation = np.array(upper + lower + le, dtype=np.float32)
+            observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
+
+
+        if self.n_boxes > 0:
+            boxes_obs = np.zeros(4*self.n_boxes, dtype=np.float32)
+
+            for i in range(self.n_boxes):
+                boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
+
+            observation["boxes"] = boxes_obs
+
 
         #self.state.airfoil_plot() # Plot the airfoil
 

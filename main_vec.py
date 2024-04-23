@@ -17,7 +17,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "ClReward_NoDelta_Wide20_3"
+name = "4M_LearningStudy_0.0005_Gamma0.99"
 ############################### MODEL NAME ########################################
 
 
@@ -25,7 +25,7 @@ name = "ClReward_NoDelta_Wide20_3"
 ############################ HYPERPARAMETERS #####################################
 n_params = 10
 max_steps = 10
-scale_actions = 0.35
+scale_actions = 0.15
 airfoil_seed = [0.1*np.ones(n_params), -0.1*np.ones(n_params), 0.0]
 delta_reward = False
 cl_reward = True
@@ -33,11 +33,17 @@ cl_reset = None
 efficiency_param = 1
 cl_wide = 20
 
-num_cpu = 10  # Number of processes to use
+num_cpu = 12  # Number of processes to use
 env_id = 'AirfoilEnv-v0'
 
-net_arch = [256, 256]
-total_timesteps = 100
+net_arch = [512, 512, 256]
+total_timesteps = 4000000
+
+
+gamma = 0.99
+#learning_rate = 0.00021
+learning_rate = 0.0005
+ent_coef = 0.0
 ############################ HYPERPARAMETERS #####################################
 
 
@@ -94,7 +100,8 @@ if __name__ == "__main__":
                n_params=n_params, max_steps=max_steps, scale_actions=scale_actions,
                airfoil_seed=airfoil_seed, delta_reward=delta_reward, cl_reward=cl_reward,
                cl_reset=cl_reset, efficiency_param=efficiency_param, cl_wide=cl_wide,
-               num_cpu=num_cpu, net_arch=net_arch, total_timesteps=total_timesteps)
+               num_cpu=num_cpu, net_arch=net_arch, total_timesteps=total_timesteps,
+               gamma=gamma, learning_rate=learning_rate)
 
     
 
@@ -107,15 +114,19 @@ if __name__ == "__main__":
     #env.render()
 
     eval_callback = EvalCallback(vec_env, best_model_save_path=LOG_DIR,
-                                log_path=LOG_DIR, eval_freq=max(2000, 1),
-                                n_eval_episodes=5, deterministic=False,
+                                log_path=LOG_DIR, eval_freq=10000,
+                                n_eval_episodes=7, deterministic=True,
                                 render=False)
 
-
+    #model = PPO.load("models/210424/210424_LearningStudy_0.00025_Gamma0.99/logs/best_model", env=vec_env, tensorboard_log=MODEL_DIR)
 
     # Instantiate the agent
-    model = PPO("MlpPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch),
-                tensorboard_log=MODEL_DIR)
+    model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch), tensorboard_log=MODEL_DIR, 
+                gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef,
+                device='cuda')
+    
+
+
     # Train the agent and display a progress bar
     model.learn(total_timesteps=total_timesteps, progress_bar=True, callback=eval_callback, tb_log_name="TB_LOG")
     # Save the agent

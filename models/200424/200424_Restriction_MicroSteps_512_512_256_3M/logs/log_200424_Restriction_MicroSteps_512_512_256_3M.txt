@@ -1,0 +1,15 @@
+Log created at 2024-04-20 11:35:20.486172
+
+
+n_params : 10
+max_steps : 25
+scale_actions : 0.12
+airfoil_seed : [array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]), array([-0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1]), 0.0]
+delta_reward : False
+cl_reward : True
+cl_reset : None
+efficiency_param : 1
+cl_wide : 20
+num_cpu : 11
+net_arch : [512, 512, 256]
+total_timesteps : 2500000
