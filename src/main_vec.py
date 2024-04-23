@@ -1,5 +1,5 @@
 import gymnasium as gym
-import environment
+import airfoil_env
 import numpy as np
 import os
 from stable_baselines3 import PPO
@@ -17,7 +17,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "4M_LearningStudy_0.0005_Gamma0.99"
+name = "aaaaaaaaaaa4M_LearningStudy_0.0005_Gamma0.99"
 ############################### MODEL NAME ########################################
 
 
