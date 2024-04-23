@@ -76,24 +76,38 @@ class AirfoilEnv(gym.Env):
 
         self.render_mode = render_mode
 
-        self.n_boxes = n_boxes
+        if n_boxes > self._BOX_LIMIT:
+            raise ValueError(f"The number of boxes is limited to {self._BOX_LIMIT}")
+        else:
+            self.n_boxes = n_boxes
 
 
         # Spaces dict is not used since it means observations are from different types of data. MultiLayerInput 
         # of Stable Baselines 3 is not the most efficient way to handle this. 
 
+        obs_dict = {} # Placeholder for the observation space
+        obs_dict["airfoil"] = spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32)
 
-        if cl_reward == True:
+        if self.cl_reward == True:
+            obs_dict["cl_target"] = spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32)
+
+        if self.n_boxes > 0:
+            obs_dict["boxes"] = spaces.Box(low=-5.0, high=5.0, shape=(4*self.n_boxes,), dtype=np.float32)
+
+        self.observation_space = spaces.Dict(obs_dict)
+
+
+        """if cl_reward == True:
             self.observation_space = spaces.Dict({
                 "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
-                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
+                "boxes": spaces.Box(low=-2.0, high=2.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
                 "cl_target": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32),
             })
         else:
             self.observation_space = spaces.Dict({
                 "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
                 "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
-            })
+            })"""
 
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
@@ -125,9 +139,11 @@ class AirfoilEnv(gym.Env):
         if self.n_boxes > self._BOX_LIMIT:
             raise ValueError(f"The number of boxes is limited to {self._BOX_LIMIT}")
         
-        if self.n_boxes == 1:
+        if self.n_boxes == 0:
+            pass
+        elif self.n_boxes == 1:
             self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
-        if self.n_boxes == 2:
+        elif self.n_boxes == 2:
             self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
                                                            xmax=0.5))
             self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
@@ -147,21 +163,17 @@ class AirfoilEnv(gym.Env):
 
         observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
 
-        
-        # Since the neural network has to have a fixed input size, the boxes are padded with zeros equivalent to 3 boxes
-        boxes_obs = np.zeros(4*self._BOX_LIMIT, dtype=np.float32)
+        if self.n_boxes > 0:
+            boxes_obs = np.zeros(4*self.n_boxes, dtype=np.float32)
 
-        for i in range(self.n_boxes):
-            boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
+            for i in range(self.n_boxes):
+                boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
 
-        observation["boxes"] = boxes_obs
+            observation["boxes"] = boxes_obs
 
 
         if self.cl_reward == True:
             observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
-
-        else:
-            observation["cl_target"] = np.array([-1], dtype=np.float32)
 
 
 
@@ -223,17 +235,15 @@ class AirfoilEnv(gym.Env):
 
         if self.cl_reward == True:
             observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
-        else:
-            observation["cl_target"] = np.array([-1], dtype=np.float32)
 
 
-        # Since the neural network has to have a fixed input size, the boxes are padded with zeros equivalent to 3 boxes
-        boxes_obs = np.zeros(4*self._BOX_LIMIT, dtype=np.float32)
+        if self.n_boxes > 0:
+            boxes_obs = np.zeros(4*self.n_boxes, dtype=np.float32)
 
-        for i in range(self.n_boxes):
-            boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
+            for i in range(self.n_boxes):
+                boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
 
-        observation["boxes"] = boxes_obs
+            observation["boxes"] = boxes_obs
 
 
         #self.state.airfoil_plot() # Plot the airfoil
