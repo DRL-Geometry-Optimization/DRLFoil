@@ -17,7 +17,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "2M_LearningStudy_0.001_Gamma0.99"
+name = "4M_LearningStudy_0.0005_Gamma0.99"
 ############################### MODEL NAME ########################################
 
 
@@ -37,12 +37,12 @@ num_cpu = 12  # Number of processes to use
 env_id = 'AirfoilEnv-v0'
 
 net_arch = [512, 512, 256]
-total_timesteps = 2000000
+total_timesteps = 4000000
 
 
 gamma = 0.99
 #learning_rate = 0.00021
-learning_rate = 0.001
+learning_rate = 0.0005
 ent_coef = 0.0
 ############################ HYPERPARAMETERS #####################################
 
