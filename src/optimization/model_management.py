@@ -1,5 +1,5 @@
-import environment
-from environment.parametrization import airfoiltools
+import airfoil_env
+from airfoil_env.parametrization import airfoiltools
 
 import gymnasium as gym
 import numpy as np

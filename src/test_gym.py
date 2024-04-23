@@ -1,6 +1,6 @@
 
 import gymnasium as gym
-import environment
+import airfoil_env
 import numpy as np
 
 # Create the environment
