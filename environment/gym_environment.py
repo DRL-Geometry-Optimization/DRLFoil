@@ -21,11 +21,11 @@ class AirfoilEnv(gym.Env):
 
     _BOX_LIMIT = 1 # Maximum number of boxes in the airfoil
 
-    def __init__(self, render_mode : bool = None, max_steps : int = 50, reward_threshold : bool = None, # Environment parameters
-                 n_params : int = 15, scale_actions : float = 1, airfoil_seed : np.ndarray = None, # Initial state of the environment
-                 cl_reward : bool = False, cl_reset : float = None, cl_wide : float = 8, # Cl reward parameters
+    def __init__(self, render_mode : bool = None, max_steps : int = 10, reward_threshold : bool = None, # Environment parameters
+                 n_params : int = 10, scale_actions : float = 0.15, airfoil_seed : np.ndarray = [0.1*np.ones(10), -0.1*np.ones(10), 0.0], # Initial state of the environment
+                 cl_reward : bool = True, cl_reset : float = None, cl_wide : float = 20, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
-                 efficiency_param : float = 0.5, # Efficiency weight parameter
+                 efficiency_param : float = 1, # Efficiency weight parameter
                  n_boxes : int = 1,): # Number of boxes in the airfoil
         
         """
