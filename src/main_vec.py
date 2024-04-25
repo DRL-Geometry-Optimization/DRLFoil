@@ -17,7 +17,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "aaaaaaaaaaa4M_LearningStudy_0.0005_Gamma0.99"
+name = "borrar"
 ############################### MODEL NAME ########################################
 
 
@@ -33,7 +33,7 @@ cl_reset = None
 efficiency_param = 1
 cl_wide = 20
 
-num_cpu = 12  # Number of processes to use
+num_cpu = 50  # Number of processes to use
 env_id = 'AirfoilEnv-v0'
 
 net_arch = [512, 512, 256]
