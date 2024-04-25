@@ -126,6 +126,7 @@ env/
 venv/
 new_venv/
 ENV/
+novenv/
 env.bak/
 venv.bak/
 
