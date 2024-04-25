@@ -122,7 +122,7 @@ if __name__ == "__main__":
     #env.render()
 
     eval_callback = EvalCallback(test_env, best_model_save_path=LOG_DIR,
-                                log_path=LOG_DIR, eval_freq=50000 // num_cpu,
+                                log_path=LOG_DIR, eval_freq=70000 // num_cpu,
                                 n_eval_episodes=7, deterministic=True,
                                 render=False)
 
