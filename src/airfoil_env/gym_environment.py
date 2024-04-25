@@ -3,7 +3,7 @@ import gymnasium as gym
 from gymnasium import spaces
 import random
 
-from .parametrization import airfoiltools
+from .parametrization import AirfoilTools
 from .reward import reward
 from .restriction import BoxRestriction
 
@@ -13,7 +13,7 @@ from .restriction import BoxRestriction
 class AirfoilEnv(gym.Env):
     """
     Airfoil environment for reinforcement learning. 
-    The environment is based on the airfoiltools class from the parametrization module.
+    The environment is based on the AirfoilTools class from the parametrization module.
     """
 
 
@@ -65,7 +65,7 @@ class AirfoilEnv(gym.Env):
         self.airfoil_seed = airfoil_seed
 
         # Create the airfoil object
-        self.state = airfoiltools() 
+        self.state = AirfoilTools() 
         self.n_params = n_params # Number of parameters in one side of the airfoil
 
         # Initialize the environment state
