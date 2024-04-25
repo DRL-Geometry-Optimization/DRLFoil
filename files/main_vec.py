@@ -10,6 +10,7 @@ from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.utils import set_random_seed
+from stable_baselines3.common.env_util import make_vec_env
 from datetime import date
 from recorder.create_logs import create_log
 
@@ -20,7 +21,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "borrar"
+name = "4M_EntropyStudy_0.001_learning0.00024"
 ############################### MODEL NAME ########################################
 
 
@@ -37,6 +38,7 @@ efficiency_param = 1
 cl_wide = 20
 
 num_cpu = 50  # Number of processes to use
+test_num_cpu = 1
 env_id = 'AirfoilEnv-v0'
 
 net_arch = [512, 512, 256]
@@ -45,8 +47,8 @@ total_timesteps = 4000000
 
 gamma = 0.99
 #learning_rate = 0.00021
-learning_rate = 0.0005
-ent_coef = 0.0
+learning_rate = 0.00024
+ent_coef = 0.001
 ############################ HYPERPARAMETERS #####################################
 
 
@@ -112,12 +114,15 @@ if __name__ == "__main__":
 
     vec_env = SubprocVecEnv([make_env(env_id, i) for i in range(num_cpu)])
 
+    test_env = SubprocVecEnv([make_env(env_id, i) for i in range(test_num_cpu)])
+
+
     # Reset the environment
     vec_env.reset()
     #env.render()
 
-    eval_callback = EvalCallback(vec_env, best_model_save_path=LOG_DIR,
-                                log_path=LOG_DIR, eval_freq=10000,
+    eval_callback = EvalCallback(test_env, best_model_save_path=LOG_DIR,
+                                log_path=LOG_DIR, eval_freq=50000 // num_cpu,
                                 n_eval_episodes=7, deterministic=True,
                                 render=False)
 
