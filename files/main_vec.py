@@ -21,7 +21,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "4M_EntropyStudy_0.001_learning0.00024"
+name = "1optuna"
 ############################### MODEL NAME ########################################
 
 
@@ -41,14 +41,20 @@ num_cpu = 50  # Number of processes to use
 test_num_cpu = 1
 env_id = 'AirfoilEnv-v0'
 
-net_arch = [512, 512, 256]
-total_timesteps = 4000000
+net_arch = [64, 64]
+total_timesteps = 4500000
 
 
-gamma = 0.99
-#learning_rate = 0.00021
-learning_rate = 0.00024
+gamma = 0.995
+learning_rate = 0.000268
 ent_coef = 0.001
+batch_size = 512
+clip_range = 0.3
+gae_lambda = 0.98
+max_grad_norm = 5
+n_epochs = 20
+n_steps = 32
+vf_coef = 0.754843
 ############################ HYPERPARAMETERS #####################################
 
 
@@ -106,7 +112,9 @@ if __name__ == "__main__":
                airfoil_seed=airfoil_seed, delta_reward=delta_reward, cl_reward=cl_reward,
                cl_reset=cl_reset, efficiency_param=efficiency_param, cl_wide=cl_wide,
                num_cpu=num_cpu, net_arch=net_arch, total_timesteps=total_timesteps,
-               gamma=gamma, learning_rate=learning_rate)
+               gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef, batch_size=batch_size,
+               clip_range=clip_range, gae_lambda=gae_lambda, max_grad_norm=max_grad_norm,
+               n_epochs=n_epochs, n_steps=n_steps, vf_coef=vf_coef)
 
     
 
@@ -130,7 +138,8 @@ if __name__ == "__main__":
 
     # Instantiate the agent
     model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch), tensorboard_log=MODEL_DIR, 
-                gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef,
+                gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef, batch_size=batch_size, clip_range=clip_range,
+                gae_lambda=gae_lambda, max_grad_norm=max_grad_norm, n_epochs=n_epochs, n_steps=n_steps, vf_coef=vf_coef,
                 device='cuda')
     
 
