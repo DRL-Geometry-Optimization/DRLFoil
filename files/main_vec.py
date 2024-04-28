@@ -21,7 +21,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "1optuna"
+name = "3optuna"
 ############################### MODEL NAME ########################################
 
 
@@ -37,24 +37,24 @@ cl_reset = None
 efficiency_param = 1
 cl_wide = 20
 
-num_cpu = 50  # Number of processes to use
+num_cpu = 48  # Number of processes to use
 test_num_cpu = 1
 env_id = 'AirfoilEnv-v0'
 
 net_arch = [64, 64]
-total_timesteps = 4500000
+total_timesteps = 2000000
 
 
-gamma = 0.995
-learning_rate = 0.000268
-ent_coef = 0.001
+gamma = 0.98
+learning_rate = 0.00018
+ent_coef = 0.0
 batch_size = 512
-clip_range = 0.3
-gae_lambda = 0.98
-max_grad_norm = 5
-n_epochs = 20
-n_steps = 32
-vf_coef = 0.754843
+clip_range = 0.2
+gae_lambda = 0.99
+max_grad_norm = 0.5
+n_epochs = 10
+n_steps = 256
+vf_coef = 0.301149
 ############################ HYPERPARAMETERS #####################################
 
 
