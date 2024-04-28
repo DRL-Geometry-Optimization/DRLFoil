@@ -13,6 +13,7 @@ from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.env_util import make_vec_env
 from datetime import date
 from recorder.create_logs import create_log
+import torch.nn as nn
 
 # tensorboard --logdir .\logs\tensorboard_logs\FECHA\MODELO
 
@@ -21,7 +22,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "3optuna"
+name = "1optuna_net_medium_3layers"
 ############################### MODEL NAME ########################################
 
 
@@ -41,20 +42,21 @@ num_cpu = 48  # Number of processes to use
 test_num_cpu = 1
 env_id = 'AirfoilEnv-v0'
 
-net_arch = [64, 64]
-total_timesteps = 2000000
+net_arch = [256, 256, 256]
+activation_fn = nn.Tanh
+total_timesteps = 3000000
 
 
-gamma = 0.98
-learning_rate = 0.00018
+gamma = 0.995
+learning_rate = 0.000268
 ent_coef = 0.0
 batch_size = 512
-clip_range = 0.2
-gae_lambda = 0.99
-max_grad_norm = 0.5
-n_epochs = 10
-n_steps = 256
-vf_coef = 0.301149
+clip_range = 0.3
+gae_lambda = 0.98
+max_grad_norm = 5.0
+n_epochs = 20
+n_steps = 32
+vf_coef = 0.754843
 ############################ HYPERPARAMETERS #####################################
 
 
@@ -137,7 +139,7 @@ if __name__ == "__main__":
     #model = PPO.load("models/210424/210424_LearningStudy_0.00025_Gamma0.99/logs/best_model", env=vec_env, tensorboard_log=MODEL_DIR)
 
     # Instantiate the agent
-    model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch), tensorboard_log=MODEL_DIR, 
+    model = PPO("MultiInputPolicy", vec_env, verbose=1, policy_kwargs=dict(net_arch=net_arch, activation_fn = activation_fn), tensorboard_log=MODEL_DIR, 
                 gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef, batch_size=batch_size, clip_range=clip_range,
                 gae_lambda=gae_lambda, max_grad_norm=max_grad_norm, n_epochs=n_epochs, n_steps=n_steps, vf_coef=vf_coef,
                 device='cuda')
