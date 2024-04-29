@@ -1,0 +1,25 @@
+Log created at 2024-04-28 13:31:37.412662
+
+
+n_params : 10
+max_steps : 10
+scale_actions : 0.15
+airfoil_seed : [array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]), array([-0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1]), 0.0]
+delta_reward : False
+cl_reward : True
+cl_reset : None
+efficiency_param : 1
+cl_wide : 20
+num_cpu : 48
+net_arch : [64, 64]
+total_timesteps : 2000000
+gamma : 0.98
+learning_rate : 0.00018
+ent_coef : 0.0
+batch_size : 512
+clip_range : 0.2
+gae_lambda : 0.99
+max_grad_norm : 0.5
+n_epochs : 10
+n_steps : 256
+vf_coef : 0.301149
