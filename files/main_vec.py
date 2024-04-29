@@ -1,3 +1,7 @@
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
+
 import sys
 sys.path.append('src/')
 
@@ -22,7 +26,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "1optuna_net_medium_3layers"
+name = "borrar"
 ############################### MODEL NAME ########################################
 
 
