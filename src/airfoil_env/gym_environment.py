@@ -19,7 +19,7 @@ class AirfoilEnv(gym.Env):
 
     metadata = {'render_modes': ["human", "no_display"], "render_fps": 2 }
 
-    _BOX_LIMIT = 1 # Maximum number of boxes in the airfoil
+    _BOX_LIMIT = 2 # Maximum number of boxes in the airfoil
 
     def __init__(self, render_mode : bool = None, max_steps : int = 10, reward_threshold : bool = None, # Environment parameters
                  n_params : int = 10, scale_actions : float = 0.15, airfoil_seed : np.ndarray = [0.1*np.ones(10), -0.1*np.ones(10), 0.0], # Initial state of the environment
