@@ -26,7 +26,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "borrar"
+name = "2boxes_optuna2"
 ############################### MODEL NAME ########################################
 
 
@@ -46,21 +46,22 @@ num_cpu = 48  # Number of processes to use
 test_num_cpu = 1
 env_id = 'AirfoilEnv-v0'
 
-net_arch = [256, 256, 256]
+net_arch = [256, 256]
 activation_fn = nn.Tanh
 total_timesteps = 3000000
 
+n_boxes = 2
 
-gamma = 0.995
-learning_rate = 0.000268
-ent_coef = 0.0
-batch_size = 512
-clip_range = 0.3
-gae_lambda = 0.98
-max_grad_norm = 5.0
-n_epochs = 20
-n_steps = 32
-vf_coef = 0.754843
+gamma = 0.95
+learning_rate = 0.000489
+ent_coef = 0.003958
+batch_size = 32
+clip_range = 0.1
+gae_lambda = 0.92
+max_grad_norm = 0.6
+n_epochs = 10
+n_steps = 256
+vf_coef = 0.999152
 ############################ HYPERPARAMETERS #####################################
 
 
@@ -96,7 +97,8 @@ def make_env(env_id: str, rank: int, seed: int = 0):
                        cl_reward = cl_reward, 
                        cl_reset = cl_reset, 
                        efficiency_param = efficiency_param, 
-                       cl_wide = cl_wide)
+                       cl_wide = cl_wide,
+                       n_boxes=n_boxes)
         env.reset(seed=seed + rank)
         return env
     set_random_seed(seed)
@@ -120,7 +122,7 @@ if __name__ == "__main__":
                num_cpu=num_cpu, net_arch=net_arch, total_timesteps=total_timesteps,
                gamma=gamma, learning_rate=learning_rate, ent_coef=ent_coef, batch_size=batch_size,
                clip_range=clip_range, gae_lambda=gae_lambda, max_grad_norm=max_grad_norm,
-               n_epochs=n_epochs, n_steps=n_steps, vf_coef=vf_coef)
+               n_epochs=n_epochs, n_steps=n_steps, vf_coef=vf_coef, activation_fn=activation_fn)
 
     
 
