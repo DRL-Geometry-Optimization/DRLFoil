@@ -26,7 +26,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "2boxes_optuna2"
+name = "test_reynolds_1box"
 ############################### MODEL NAME ########################################
 
 
@@ -41,6 +41,7 @@ cl_reward = True
 cl_reset = None
 efficiency_param = 1
 cl_wide = 20
+set_reynolds = -1
 
 num_cpu = 48  # Number of processes to use
 test_num_cpu = 1
@@ -50,7 +51,7 @@ net_arch = [256, 256]
 activation_fn = nn.Tanh
 total_timesteps = 3000000
 
-n_boxes = 2
+n_boxes = 1
 
 gamma = 0.95
 learning_rate = 0.000489
@@ -98,7 +99,8 @@ def make_env(env_id: str, rank: int, seed: int = 0):
                        cl_reset = cl_reset, 
                        efficiency_param = efficiency_param, 
                        cl_wide = cl_wide,
-                       n_boxes=n_boxes)
+                       n_boxes=n_boxes,
+                       set_reynolds=set_reynolds)
         env.reset(seed=seed + rank)
         return env
     set_random_seed(seed)
