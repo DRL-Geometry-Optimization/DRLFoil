@@ -26,7 +26,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "test_reynolds_1box"
+name = "test_reynolds_optuna1_1box_3layers"
 ############################### MODEL NAME ########################################
 
 
@@ -47,22 +47,22 @@ num_cpu = 48  # Number of processes to use
 test_num_cpu = 1
 env_id = 'AirfoilEnv-v0'
 
-net_arch = [256, 256]
+net_arch = [256, 256, 256]
 activation_fn = nn.Tanh
 total_timesteps = 3000000
 
 n_boxes = 1
 
-gamma = 0.95
-learning_rate = 0.000489
+gamma = 0.995
+learning_rate = 0.000268
 ent_coef = 0.003958
 batch_size = 32
 clip_range = 0.1
 gae_lambda = 0.92
-max_grad_norm = 0.6
-n_epochs = 10
-n_steps = 256
-vf_coef = 0.999152
+max_grad_norm = 5.0
+n_epochs = 20
+n_steps = 32
+vf_coef = 0.754843
 ############################ HYPERPARAMETERS #####################################
 
 
