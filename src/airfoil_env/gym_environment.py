@@ -62,7 +62,11 @@ class AirfoilEnv(gym.Env):
 
         self.set_reynolds = set_reynolds 
 
-        self.reynolds = self.set_reynolds if self.set_reynolds is not None else None
+        if self.set_reynolds is not None:
+            self.reynolds = self.set_reynolds
+        else:
+            self.reynolds = 1e6
+
 
         self.cl_wide = cl_wide
         self.delta_reward = delta_reward
