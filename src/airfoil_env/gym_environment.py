@@ -26,7 +26,7 @@ class AirfoilEnv(gym.Env):
                  cl_reward : bool = True, cl_reset : float = None, cl_wide : float = 20, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
                  efficiency_param : float = 1, # Efficiency weight parameter
-                 n_boxes : int = 1, set_reynolds : int = None): # Number of boxes in the airfoil
+                 n_boxes : int = 1, reynolds : int = 1e6): # Number of boxes in the airfoil
         
         """
         Initialize the environment with the following parameters:
@@ -60,13 +60,6 @@ class AirfoilEnv(gym.Env):
         else:
             self.cl_target = None # Placeholder for the cl target that will be randomly generated in the reset method
 
-        self.set_reynolds = set_reynolds 
-
-        if self.set_reynolds is not None:
-            self.reynolds = self.set_reynolds
-        else:
-            self.reynolds = 1e6
-
 
         self.cl_wide = cl_wide
         self.delta_reward = delta_reward
@@ -92,13 +85,22 @@ class AirfoilEnv(gym.Env):
             self.n_boxes = n_boxes
 
 
+        self.reynolds = reynolds
+
+        self.random_reynolds = False # Placeholder for the random reynolds number. If reynolds is -1, it will be True
+        self.no_reynolds = False # Placeholder for the case where reynolds is None
+
         # Check reynolds number
-        if self.set_reynolds is not None:
-            if self.set_reynolds < 1e4 or self.set_reynolds > 1e6:
-                if self.set_reynolds == -1:
-                    pass
-                else:
-                    raise ValueError("Reynolds number is out of range. It should be between 1e4 and 1e6")
+        if self.reynolds is not None:
+            if self.reynolds == -1: # It is made because old trained models does not have the reynolds number as an observation.
+                self.no_reynolds = True
+                self.reynolds = 1e6
+            else:
+                if self.reynolds < 1e4 or self.reynolds > 1e7:
+                    raise ValueError("Reynolds number is out of range. It should be between 1e4 and 1e7")
+        else:
+            self.random_reynolds = True
+
 
 
         # Spaces dict is not used since it means observations are from different types of data. MultiLayerInput 
@@ -113,34 +115,24 @@ class AirfoilEnv(gym.Env):
         if self.n_boxes > 0:
             obs_dict["boxes"] = spaces.Box(low=-5.0, high=5.0, shape=(4*self.n_boxes,), dtype=np.float32)
 
-        if self.set_reynolds is not None:
+        if self.no_reynolds == False:
             obs_dict["reynolds"] = spaces.Box(low=0, high=1, shape=(1,), dtype=np.float32)
 
         self.observation_space = spaces.Dict(obs_dict)
-
-
-        """if cl_reward == True:
-            self.observation_space = spaces.Dict({
-                "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
-                "boxes": spaces.Box(low=-2.0, high=2.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
-                "cl_target": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32),
-            })
-        else:
-            self.observation_space = spaces.Dict({
-                "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
-                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
-            })"""
 
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
 
 
 
+
     def _get_info(self) -> dict:
         """
         This method returns additional information about the environment state.
-        """
+          """
         return {"CL": self.state.get_cl, "efficiency": self.state.get_efficiency, "step": self.step_counter}
+
+
 
 
     def reset(self, seed=None, options=None):
@@ -171,8 +163,8 @@ class AirfoilEnv(gym.Env):
             self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
                                                            xmin=0.5))
             
-        if self.set_reynolds == -1:
-            self.reynolds = random.uniform(1e4, 1e6)
+        if self.random_reynolds == True:
+            self.reynolds = random.uniform(1e4, 1e7)
 
 
 
@@ -200,8 +192,8 @@ class AirfoilEnv(gym.Env):
         if self.cl_reward == True:
             observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
 
-        if self.set_reynolds is not None:
-            observation["reynolds"] = np.array([self.reynolds / 1e6], dtype=np.float32)
+        if self.no_reynolds is False:
+            observation["reynolds"] = np.array([self.reynolds / 1e7], dtype=np.float32)
 
 
 
@@ -273,8 +265,8 @@ class AirfoilEnv(gym.Env):
 
             observation["boxes"] = boxes_obs
 
-        if self.set_reynolds is not None:
-            observation["reynolds"] = np.array([self.reynolds / 1e6], dtype=np.float32)
+        if self.no_reynolds == False:
+            observation["reynolds"] = np.array([self.reynolds / 1e7], dtype=np.float32)
 
 
         #self.state.airfoil_plot() # Plot the airfoil
