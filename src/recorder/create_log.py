@@ -1,7 +1,7 @@
 import datetime
 import os
 
-def create_log(name : str, dir : str, **vars) -> None:
+def CreateLog(name : str, dir : str, **vars) -> None:
     if not os.path.exists(dir):
         raise FileNotFoundError(f"Directory {dir} does not exist")
     
