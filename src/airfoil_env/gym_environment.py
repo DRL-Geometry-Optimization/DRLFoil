@@ -131,6 +131,27 @@ class AirfoilEnv(gym.Env):
         This method returns additional information about the environment state.
           """
         return {"CL": self.state.get_cl, "efficiency": self.state.get_efficiency, "step": self.step_counter}
+    
+
+    def _get_obs(self):
+        upper, lower, le = self.state.get_weights()
+        observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
+
+        if self.n_boxes > 0:
+            boxes_obs = np.zeros(4*self.n_boxes, dtype=np.float32)
+
+            for i in range(self.n_boxes):
+                boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
+
+            observation["boxes"] = boxes_obs
+
+        if self.cl_reward == True:
+            observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
+
+        if self.no_reynolds is False:
+            observation["reynolds"] = np.array([self.reynolds / 1e7], dtype=np.float32)
+
+        return observation
 
 
 
@@ -175,27 +196,6 @@ class AirfoilEnv(gym.Env):
             self.cl_target = random.uniform(0.1, 1.2)
 
 
-        upper, lower, le = self.state.get_weights()
-
-
-        observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
-
-        if self.n_boxes > 0:
-            boxes_obs = np.zeros(4*self.n_boxes, dtype=np.float32)
-
-            for i in range(self.n_boxes):
-                boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
-
-            observation["boxes"] = boxes_obs
-
-
-        if self.cl_reward == True:
-            observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
-
-        if self.no_reynolds is False:
-            observation["reynolds"] = np.array([self.reynolds / 1e7], dtype=np.float32)
-
-
 
         self.state.analysis(re=self.reynolds) # Analyze the airfoil
         self.last_efficiency = self.state.get_efficiency()
@@ -204,7 +204,7 @@ class AirfoilEnv(gym.Env):
 
         #self.state.airfoil_plot() # Plot the airfoil
 
-        return observation, info
+        return self._get_obs(), info
 
 
 
@@ -248,30 +248,10 @@ class AirfoilEnv(gym.Env):
         if self.step_counter >= self.max_steps:
             self.done = True
 
-        upper, lower, le = self.state.get_weights()
-        
-
-        observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
-
-        if self.cl_reward == True:
-            observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
-
-
-        if self.n_boxes > 0:
-            boxes_obs = np.zeros(4*self.n_boxes, dtype=np.float32)
-
-            for i in range(self.n_boxes):
-                boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
-
-            observation["boxes"] = boxes_obs
-
-        if self.no_reynolds == False:
-            observation["reynolds"] = np.array([self.reynolds / 1e7], dtype=np.float32)
-
 
         #self.state.airfoil_plot() # Plot the airfoil
 
-        return observation, self.reward, self.done, False, {"step": self.step_counter, "efficiency": self.state.get_efficiency(),
+        return self._get_obs(), self.reward, self.done, False, {"step": self.step_counter, "efficiency": self.state.get_efficiency(),
                                                             "cl": self.state.get_cl()}
     
 
