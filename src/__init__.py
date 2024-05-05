@@ -1,2 +1,2 @@
-from .handler import DRLAirfoil
+from .main import Optimize
 
