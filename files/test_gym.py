@@ -1,5 +1,5 @@
 import sys
-sys.path.append('src/')
+sys.path.append('drlfoil/')
 
 import gymnasium as gym
 import airfoil_env

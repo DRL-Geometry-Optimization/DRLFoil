@@ -3,7 +3,7 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 
 import sys
-sys.path.append('src/')
+sys.path.append('drlfoil/')
 
 import gymnasium as gym
 import airfoil_env
