@@ -16,7 +16,7 @@ from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.env_util import make_vec_env
 from datetime import date
-from recorder.create_logs import create_log
+from recorder.create_log import CreateLog
 import torch.nn as nn
 
 # tensorboard --logdir .\logs\tensorboard_logs\FECHA\MODELO
@@ -26,7 +26,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "test_reynolds_optuna1_1box_3layers"
+name = "borrar"
 ############################### MODEL NAME ########################################
 
 
@@ -41,7 +41,7 @@ cl_reward = True
 cl_reset = None
 efficiency_param = 1
 cl_wide = 20
-set_reynolds = -1
+reynolds = -1
 
 num_cpu = 48  # Number of processes to use
 test_num_cpu = 1
@@ -100,7 +100,7 @@ def make_env(env_id: str, rank: int, seed: int = 0):
                        efficiency_param = efficiency_param, 
                        cl_wide = cl_wide,
                        n_boxes=n_boxes,
-                       set_reynolds=set_reynolds)
+                       reynolds=reynolds)
         env.reset(seed=seed + rank)
         return env
     set_random_seed(seed)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
 
     # Create log for the logs directory
-    create_log(name=MODEL_NAME, dir=LOG_DIR,
+    CreateLog(name=MODEL_NAME, dir=LOG_DIR,
                n_params=n_params, max_steps=max_steps, scale_actions=scale_actions,
                airfoil_seed=airfoil_seed, delta_reward=delta_reward, cl_reward=cl_reward,
                cl_reset=cl_reset, efficiency_param=efficiency_param, cl_wide=cl_wide,
