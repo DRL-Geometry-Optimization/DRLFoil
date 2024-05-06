@@ -20,6 +20,10 @@ class AirfoilEnv(gym.Env):
     metadata = {'render_modes': ["human", "no_display"], "render_fps": 2 }
 
     _BOX_LIMIT = 2 # Maximum number of boxes in the airfoil
+    _CL_MIN = 0.1 # Minimum Cl value for the airfoil
+    _CL_MAX = 1.3 # Maximum Cl value for the airfoil
+    _RE_MIN = 1e4 # Minimum Reynolds number
+    _RE_MAX = 1e7 # Maximum Reynolds number
 
     def __init__(self, render_mode : bool = None, max_steps : int = 10, reward_threshold : bool = None, # Environment parameters
                  n_params : int = 10, scale_actions : float = 0.15, airfoil_seed : np.ndarray = [0.1*np.ones(10), -0.1*np.ones(10), 0.0], # Initial state of the environment
@@ -56,6 +60,8 @@ class AirfoilEnv(gym.Env):
         self.cl_reset = cl_reset
 
         if cl_reward == True and self.cl_reset is not None:
+            if self.cl_reset < self._CL_MIN or self.cl_reset > self._CL_MAX:
+                raise ValueError(f"cl_reset is out of range. It should be between {self._CL_MIN} and {self._CL_MAX}")
             self.cl_target = self.cl_reset # Cl target is fixed
         else:
             self.cl_target = None # Placeholder for the cl target that will be randomly generated in the reset method
@@ -96,8 +102,8 @@ class AirfoilEnv(gym.Env):
                 self.no_reynolds = True
                 self.reynolds = 1e6
             else:
-                if self.reynolds < 1e4 or self.reynolds > 1e7:
-                    raise ValueError("Reynolds number is out of range. It should be between 1e4 and 1e7")
+                if self.reynolds < self._RE_MIN or self.reynolds > self._RE_MAX:
+                    raise ValueError(f"Reynolds number is out of range. It should be between {self._RE_MIN} and {self._RE_MAX}")
         else:
             self.random_reynolds = True
 
@@ -185,7 +191,7 @@ class AirfoilEnv(gym.Env):
                                                            xmin=0.5))
             
         if self.random_reynolds == True:
-            self.reynolds = random.uniform(1e4, 1e7)
+            self.reynolds = random.uniform(self._RE_MIN, self._RE_MAX)
 
 
 
@@ -193,7 +199,7 @@ class AirfoilEnv(gym.Env):
         self.step_counter = 0
 
         if self.cl_reward == True and self.cl_reset is None:
-            self.cl_target = random.uniform(0.1, 1.2)
+            self.cl_target = random.uniform(self._CL_MIN, self._CL_MAX)
 
 
 
@@ -224,7 +230,7 @@ class AirfoilEnv(gym.Env):
         else:
             self.state.analysis(re=self.reynolds) # Analyze the airfoil
 
-            # NOTE: REWARD SHOULD BE UPTADETED TO INCLUDE THE CL TARGET
+
             self.reward = reward(efficiency=self.state.get_efficiency(),
                                 efficiency_param=self.efficiency_param, 
                                 last_efficiency=self.last_efficiency,
