@@ -26,7 +26,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "borrar"
+name = "2box_RandomReynolds_OneBox_OptunaBest"
 ############################### MODEL NAME ########################################
 
 
@@ -41,7 +41,7 @@ cl_reward = True
 cl_reset = None
 efficiency_param = 1
 cl_wide = 20
-reynolds = -1
+
 
 num_cpu = 48  # Number of processes to use
 test_num_cpu = 1
@@ -51,14 +51,15 @@ net_arch = [256, 256, 256]
 activation_fn = nn.Tanh
 total_timesteps = 3000000
 
-n_boxes = 1
+n_boxes = 2
+reynolds = None
 
 gamma = 0.995
 learning_rate = 0.000268
-ent_coef = 0.003958
-batch_size = 32
-clip_range = 0.1
-gae_lambda = 0.92
+ent_coef = 0.0
+batch_size = 512
+clip_range = 0.3
+gae_lambda = 0.98
 max_grad_norm = 5.0
 n_epochs = 20
 n_steps = 32
@@ -140,7 +141,7 @@ if __name__ == "__main__":
     #env.render()
 
     eval_callback = EvalCallback(test_env, best_model_save_path=LOG_DIR,
-                                log_path=LOG_DIR, eval_freq=70000 // num_cpu,
+                                log_path=LOG_DIR, eval_freq=50000 // num_cpu,
                                 n_eval_episodes=7, deterministic=True,
                                 render=False)
 
