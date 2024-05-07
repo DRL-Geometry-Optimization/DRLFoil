@@ -3,7 +3,7 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 
 import sys
-sys.path.append('src/')
+sys.path.append('drlfoil/')
 
 import gymnasium as gym
 import airfoil_env
@@ -16,7 +16,7 @@ from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.env_util import make_vec_env
 from datetime import date
-from recorder.create_logs import create_log
+from recorder.create_log import CreateLog
 import torch.nn as nn
 
 # tensorboard --logdir .\logs\tensorboard_logs\FECHA\MODELO
@@ -26,13 +26,13 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "2boxes_optuna2"
+name = "8Param_RandomReynolds_TwoBox_OptunaBest"
 ############################### MODEL NAME ########################################
 
 
 
 ############################ HYPERPARAMETERS #####################################
-n_params = 10
+n_params = 8
 max_steps = 10
 scale_actions = 0.15
 airfoil_seed = [0.1*np.ones(n_params), -0.1*np.ones(n_params), 0.0]
@@ -42,26 +42,28 @@ cl_reset = None
 efficiency_param = 1
 cl_wide = 20
 
+
 num_cpu = 48  # Number of processes to use
 test_num_cpu = 1
 env_id = 'AirfoilEnv-v0'
 
-net_arch = [256, 256]
+net_arch = [256, 256, 256]
 activation_fn = nn.Tanh
-total_timesteps = 3000000
+total_timesteps = 2000000
 
-n_boxes = 2
+n_boxes = 2 
+reynolds = None
 
-gamma = 0.95
-learning_rate = 0.000489
-ent_coef = 0.003958
-batch_size = 32
-clip_range = 0.1
-gae_lambda = 0.92
-max_grad_norm = 0.6
-n_epochs = 10
-n_steps = 256
-vf_coef = 0.999152
+gamma = 0.995
+learning_rate = 0.000268
+ent_coef = 0.0
+batch_size = 512
+clip_range = 0.3
+gae_lambda = 0.98
+max_grad_norm = 5.0
+n_epochs = 20
+n_steps = 32
+vf_coef = 0.754843
 ############################ HYPERPARAMETERS #####################################
 
 
@@ -98,7 +100,8 @@ def make_env(env_id: str, rank: int, seed: int = 0):
                        cl_reset = cl_reset, 
                        efficiency_param = efficiency_param, 
                        cl_wide = cl_wide,
-                       n_boxes=n_boxes)
+                       n_boxes=n_boxes,
+                       reynolds=reynolds)
         env.reset(seed=seed + rank)
         return env
     set_random_seed(seed)
@@ -115,7 +118,7 @@ if __name__ == "__main__":
 
 
     # Create log for the logs directory
-    create_log(name=MODEL_NAME, dir=LOG_DIR,
+    CreateLog(name=MODEL_NAME, dir=LOG_DIR,
                n_params=n_params, max_steps=max_steps, scale_actions=scale_actions,
                airfoil_seed=airfoil_seed, delta_reward=delta_reward, cl_reward=cl_reward,
                cl_reset=cl_reset, efficiency_param=efficiency_param, cl_wide=cl_wide,
@@ -138,7 +141,7 @@ if __name__ == "__main__":
     #env.render()
 
     eval_callback = EvalCallback(test_env, best_model_save_path=LOG_DIR,
-                                log_path=LOG_DIR, eval_freq=70000 // num_cpu,
+                                log_path=LOG_DIR, eval_freq=50000 // num_cpu,
                                 n_eval_episodes=7, deterministic=True,
                                 render=False)
 

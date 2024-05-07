@@ -20,13 +20,17 @@ class AirfoilEnv(gym.Env):
     metadata = {'render_modes': ["human", "no_display"], "render_fps": 2 }
 
     _BOX_LIMIT = 2 # Maximum number of boxes in the airfoil
+    _CL_MIN = 0.1 # Minimum Cl value for the airfoil
+    _CL_MAX = 1.3 # Maximum Cl value for the airfoil
+    _RE_MIN = 1e4 # Minimum Reynolds number
+    _RE_MAX = 1e7 # Maximum Reynolds number
 
     def __init__(self, render_mode : bool = None, max_steps : int = 10, reward_threshold : bool = None, # Environment parameters
                  n_params : int = 10, scale_actions : float = 0.15, airfoil_seed : np.ndarray = [0.1*np.ones(10), -0.1*np.ones(10), 0.0], # Initial state of the environment
                  cl_reward : bool = True, cl_reset : float = None, cl_wide : float = 20, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
                  efficiency_param : float = 1, # Efficiency weight parameter
-                 n_boxes : int = 1,): # Number of boxes in the airfoil
+                 n_boxes : int = 1, reynolds : int = 1e6): # Number of boxes in the airfoil
         
         """
         Initialize the environment with the following parameters:
@@ -43,6 +47,8 @@ class AirfoilEnv(gym.Env):
         - cl_wide: The width of the bell function for the Cl reward.
         - delta_reward: If True, the reward is based on the difference between the current efficiency and the last efficiency.
         - efficiency_param: The weight of the efficiency in the reward function.
+        - n_boxes: The number of boxes in the airfoil.
+        - reynolds: The Reynolds number of the airfoil. If it is -1, it is randomly generated, and if it is None, it is not used.
         """
 
         
@@ -54,9 +60,12 @@ class AirfoilEnv(gym.Env):
         self.cl_reset = cl_reset
 
         if cl_reward == True and self.cl_reset is not None:
+            if self.cl_reset < self._CL_MIN or self.cl_reset > self._CL_MAX:
+                raise ValueError(f"cl_reset is out of range. It should be between {self._CL_MIN} and {self._CL_MAX}")
             self.cl_target = self.cl_reset # Cl target is fixed
         else:
             self.cl_target = None # Placeholder for the cl target that will be randomly generated in the reset method
+
 
         self.cl_wide = cl_wide
         self.delta_reward = delta_reward
@@ -82,6 +91,24 @@ class AirfoilEnv(gym.Env):
             self.n_boxes = n_boxes
 
 
+        self.reynolds = reynolds
+
+        self.random_reynolds = False # Placeholder for the random reynolds number. If reynolds is -1, it will be True
+        self.no_reynolds = False # Placeholder for the case where reynolds is None
+
+        # Check reynolds number
+        if self.reynolds is not None:
+            if self.reynolds == -1: # It is made because old trained models does not have the reynolds number as an observation.
+                self.no_reynolds = True
+                self.reynolds = 1e6
+            else:
+                if self.reynolds < self._RE_MIN or self.reynolds > self._RE_MAX:
+                    raise ValueError(f"Reynolds number is out of range. It should be between {self._RE_MIN} and {self._RE_MAX}")
+        else:
+            self.random_reynolds = True
+
+
+
         # Spaces dict is not used since it means observations are from different types of data. MultiLayerInput 
         # of Stable Baselines 3 is not the most efficient way to handle this. 
 
@@ -94,31 +121,45 @@ class AirfoilEnv(gym.Env):
         if self.n_boxes > 0:
             obs_dict["boxes"] = spaces.Box(low=-5.0, high=5.0, shape=(4*self.n_boxes,), dtype=np.float32)
 
+        if self.no_reynolds == False:
+            obs_dict["reynolds"] = spaces.Box(low=0, high=1, shape=(1,), dtype=np.float32)
+
         self.observation_space = spaces.Dict(obs_dict)
-
-
-        """if cl_reward == True:
-            self.observation_space = spaces.Dict({
-                "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
-                "boxes": spaces.Box(low=-2.0, high=2.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
-                "cl_target": spaces.Box(low=-5.0, high=5.0, shape=(1,), dtype=np.float32),
-            })
-        else:
-            self.observation_space = spaces.Dict({
-                "airfoil": spaces.Box(low=-5.0, high=5.0, shape=(2*self.n_params + 1,), dtype=np.float32),
-                "boxes": spaces.Box(low=-5.0, high=5.0, shape=(4*self._BOX_LIMIT,), dtype=np.float32),
-            })"""
 
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
 
 
 
+
     def _get_info(self) -> dict:
         """
         This method returns additional information about the environment state.
-        """
+          """
         return {"CL": self.state.get_cl, "efficiency": self.state.get_efficiency, "step": self.step_counter}
+    
+
+    def _get_obs(self):
+        upper, lower, le = self.state.get_weights()
+        observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
+
+        if self.n_boxes > 0:
+            boxes_obs = np.zeros(4*self.n_boxes, dtype=np.float32)
+
+            for i in range(self.n_boxes):
+                boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
+
+            observation["boxes"] = boxes_obs
+
+        if self.cl_reward == True:
+            observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
+
+        if self.no_reynolds is False:
+            observation["reynolds"] = np.array([self.reynolds / 1e7], dtype=np.float32)
+
+        return observation
+
+
 
 
     def reset(self, seed=None, options=None):
@@ -148,6 +189,9 @@ class AirfoilEnv(gym.Env):
                                                            xmax=0.5))
             self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
                                                            xmin=0.5))
+            
+        if self.random_reynolds == True:
+            self.reynolds = random.uniform(self._RE_MIN, self._RE_MAX)
 
 
 
@@ -155,36 +199,18 @@ class AirfoilEnv(gym.Env):
         self.step_counter = 0
 
         if self.cl_reward == True and self.cl_reset is None:
-            self.cl_target = random.uniform(0.1, 1.2)
-
-
-        upper, lower, le = self.state.get_weights()
-
-
-        observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
-
-        if self.n_boxes > 0:
-            boxes_obs = np.zeros(4*self.n_boxes, dtype=np.float32)
-
-            for i in range(self.n_boxes):
-                boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
-
-            observation["boxes"] = boxes_obs
-
-
-        if self.cl_reward == True:
-            observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
+            self.cl_target = random.uniform(self._CL_MIN, self._CL_MAX)
 
 
 
-        self.state.analysis() # Analyze the airfoil
+        self.state.analysis(re=self.reynolds) # Analyze the airfoil
         self.last_efficiency = self.state.get_efficiency()
 
         info = {} # Placeholder for additional information
 
         #self.state.airfoil_plot() # Plot the airfoil
 
-        return observation, info
+        return self._get_obs(), info
 
 
 
@@ -202,9 +228,9 @@ class AirfoilEnv(gym.Env):
             self.reward = -100
             # Last efficiency is not updated
         else:
-            self.state.analysis() # Analyze the airfoil
+            self.state.analysis(re=self.reynolds) # Analyze the airfoil
 
-            # NOTE: REWARD SHOULD BE UPTADETED TO INCLUDE THE CL TARGET
+
             self.reward = reward(efficiency=self.state.get_efficiency(),
                                 efficiency_param=self.efficiency_param, 
                                 last_efficiency=self.last_efficiency,
@@ -228,27 +254,10 @@ class AirfoilEnv(gym.Env):
         if self.step_counter >= self.max_steps:
             self.done = True
 
-        upper, lower, le = self.state.get_weights()
-        
-
-        observation = {"airfoil": np.array(upper + lower + le, dtype=np.float32),}
-
-        if self.cl_reward == True:
-            observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
-
-
-        if self.n_boxes > 0:
-            boxes_obs = np.zeros(4*self.n_boxes, dtype=np.float32)
-
-            for i in range(self.n_boxes):
-                boxes_obs[4*i:4*(i+1)] = self.state.return_boxes()[i]
-
-            observation["boxes"] = boxes_obs
-
 
         #self.state.airfoil_plot() # Plot the airfoil
 
-        return observation, self.reward, self.done, False, {"step": self.step_counter, "efficiency": self.state.get_efficiency(),
+        return self._get_obs(), self.reward, self.done, False, {"step": self.step_counter, "efficiency": self.state.get_efficiency(),
                                                             "cl": self.state.get_cl()}
     
 
