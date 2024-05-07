@@ -72,7 +72,7 @@ vf_coef = 0.754843
 # Model name
 MODEL_NAME = f"{formatted_date}_{name}"
 # Model directory
-MODEL_DIR = f"./models/{formatted_date}/{MODEL_NAME}"
+MODEL_DIR = f"./logmodels/{formatted_date}/{MODEL_NAME}"
 # Log directory
 LOG_DIR = f"{MODEL_DIR}/logs"
 # Tensorboard directory
