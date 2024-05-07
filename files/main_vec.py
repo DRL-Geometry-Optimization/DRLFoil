@@ -26,13 +26,13 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "2box_RandomReynolds_OneBox_OptunaBest"
+name = "8Param_RandomReynolds_TwoBox_OptunaBest"
 ############################### MODEL NAME ########################################
 
 
 
 ############################ HYPERPARAMETERS #####################################
-n_params = 10
+n_params = 8
 max_steps = 10
 scale_actions = 0.15
 airfoil_seed = [0.1*np.ones(n_params), -0.1*np.ones(n_params), 0.0]
@@ -49,9 +49,9 @@ env_id = 'AirfoilEnv-v0'
 
 net_arch = [256, 256, 256]
 activation_fn = nn.Tanh
-total_timesteps = 3000000
+total_timesteps = 2000000
 
-n_boxes = 2
+n_boxes = 2 
 reynolds = None
 
 gamma = 0.995
