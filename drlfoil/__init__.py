@@ -1,2 +1,2 @@
-from .main import Optimize
+from .handler import Optimize
 
