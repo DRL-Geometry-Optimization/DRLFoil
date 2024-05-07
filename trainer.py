@@ -2,11 +2,10 @@ import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 
-import sys
-sys.path.append('drlfoil/')
+import drlfoil
+from drlfoil.recorder.create_log import CreateLog
 
 import gymnasium as gym
-import airfoil_env
 import numpy as np
 import os
 from stable_baselines3 import PPO
@@ -16,7 +15,6 @@ from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.env_util import make_vec_env
 from datetime import date
-from recorder.create_log import CreateLog
 import torch.nn as nn
 
 # tensorboard --logdir .\logs\tensorboard_logs\FECHA\MODELO
@@ -26,7 +24,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "8Param_RandomReynolds_TwoBox_OptunaBest"
+name = "borrar"
 ############################### MODEL NAME ########################################
 
 

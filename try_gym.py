@@ -1,8 +1,8 @@
 import sys
-sys.path.append('drlfoil/')
+
 
 import gymnasium as gym
-import airfoil_env
+import drlfoil
 import numpy as np
 
 # Create the environment
@@ -11,7 +11,7 @@ env = gym.make('AirfoilEnv-v0', n_params=10, max_steps=2, scale_actions = 0.15, 
                 delta_reward=False, cl_reward = True, cl_reset = None, efficiency_param = 1, cl_wide = 20,
                 render_mode="human",
                 n_boxes=2,
-                reynolds = 1e8)
+                reynolds = 1e7)
 
 
 # Reset the environment
