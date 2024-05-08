@@ -162,7 +162,7 @@ class AirfoilEnv(gym.Env):
 
 
 
-    def reset(self, seed=None, options=None):
+    def reset(self, seed=None, options={}):
 
         super().reset(seed=seed)
         # Reset the environment state 
@@ -193,7 +193,13 @@ class AirfoilEnv(gym.Env):
         if self.random_reynolds == True:
             self.reynolds = random.uniform(self._RE_MIN, self._RE_MAX)
 
+        ############################ Temporal solution for the reynolds number ############################
 
+        if 'reynolds' in options:
+            self.reynolds = options['reynolds']
+            print(f"Reynolds number set to {options['reynolds']}. Don't forget to create a setter for the reynolds number in the environment.")
+
+        #############################################################################################
 
         self.done = False
         self.step_counter = 0
@@ -201,7 +207,13 @@ class AirfoilEnv(gym.Env):
         if self.cl_reward == True and self.cl_reset is None:
             self.cl_target = random.uniform(self._CL_MIN, self._CL_MAX)
 
+        ############################ Temporal solution for the cl target ############################
 
+        if 'cl_target' in options:
+            self.cl_target = options['cl_target']
+            print(f"Cl target set to {options['cl_target']}. Don't forget to create a setter for the cl target in the environment.")
+
+        #############################################################################################
 
         self.state.analysis(re=self.reynolds) # Analyze the airfoil
         self.last_efficiency = self.state.get_efficiency()
