@@ -24,7 +24,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "borrar"
+name = "8Param_RandomReynolds_NoBox_OptunaBest"
 ############################### MODEL NAME ########################################
 
 
@@ -49,7 +49,7 @@ net_arch = [256, 256, 256]
 activation_fn = nn.Tanh
 total_timesteps = 2000000
 
-n_boxes = 2 
+n_boxes = 0
 reynolds = None
 
 gamma = 0.995
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     #env.render()
 
     eval_callback = EvalCallback(test_env, best_model_save_path=LOG_DIR,
-                                log_path=LOG_DIR, eval_freq=50000 // num_cpu,
+                                log_path=LOG_DIR, eval_freq=5000 // num_cpu,
                                 n_eval_episodes=7, deterministic=True,
                                 render=False)
 
