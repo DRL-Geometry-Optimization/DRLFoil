@@ -6,7 +6,7 @@ from drlfoil import airfoil_env
 import copy
 
 class Optimize: 
-    def __init__(self, model : str, cl_target : float, reynolds : float, logs : int = 1):
+    def __init__(self, model : str, cl_target : float, reynolds : float, steps : int = 10, logs : int = 1):
         """
         Class used to handle the optimization of the airfoil environment with the pre-trained models
 
@@ -44,6 +44,8 @@ class Optimize:
         self.cl_target = cl_target
         self.reynolds = reynolds
 
+        self.steps = steps
+
         self.bestairfoil = None # Placeholder for the best airfoil found
 
         if model == 'onebox':
@@ -57,7 +59,7 @@ class Optimize:
             # Load the environment with the parameters from the log file and cl targey & reynolds defined by the user
             self.env = gym.make('AirfoilEnv-v0', 
                            n_params= int(_find_values(self.log_path, 'n_params')),
-                           max_steps= int(_find_values(self.log_path, 'max_steps')),
+                           max_steps= steps,
                            scale_actions = float(_find_values(self.log_path, 'scale_actions')),
                            airfoil_seed = [0.1*np.ones(int(_find_values(self.log_path, 'n_params'))), -0.1*np.ones(int(_find_values(self.log_path, 'n_params'))), 0.0], #TO BE CHANGED
                            delta_reward= False, 
@@ -83,7 +85,7 @@ class Optimize:
             # Load the environment with the parameters from the log file and cl targey & reynolds defined by the user
             self.env = gym.make('AirfoilEnv-v0', 
                            n_params= int(_find_values(self.log_path, 'n_params')),
-                           max_steps= int(_find_values(self.log_path, 'max_steps')),
+                           max_steps= steps,
                            scale_actions = float(_find_values(self.log_path, 'scale_actions')),
                            airfoil_seed = [0.1*np.ones(int(_find_values(self.log_path, 'n_params'))), -0.1*np.ones(int(_find_values(self.log_path, 'n_params'))), 0.0], #TO BE CHANGED
                            delta_reward= False, 
@@ -109,7 +111,7 @@ class Optimize:
             # Load the environment with the parameters from the log file and cl targey & reynolds defined by the user
             self.env = gym.make('AirfoilEnv-v0', 
                            n_params= int(_find_values(self.log_path, 'n_params')),
-                           max_steps= int(_find_values(self.log_path, 'max_steps')),
+                           max_steps= steps,
                            scale_actions = float(_find_values(self.log_path, 'scale_actions')),
                            airfoil_seed = [0.1*np.ones(int(_find_values(self.log_path, 'n_params'))), -0.1*np.ones(int(_find_values(self.log_path, 'n_params'))), 0.0], #TO BE CHANGED
                            delta_reward= False, 
@@ -152,16 +154,15 @@ class Optimize:
                 if self.logs == 3:
                     print("*** New best airfoil found!")
 
-        if self.logs >= 1:
+        if self.logs >= 2:
             print("*** Optimization finished! Time elapsed:", time.time()-start_time, "seconds")
-            print(f"     Best airfoil found with a reward of {self.bestairfoil['reward']}, lift coefficient of {self.bestairfoil['cl']} and efficiency of {self.bestairfoil['efficiency']}")   
+        if self.logs >= 1:
+            print(f"***Best airfoil found with a reward of {self.bestairfoil['reward']}, lift coefficient of {self.bestairfoil['cl']} (target: {self.cl_target}) and efficiency of {self.bestairfoil['efficiency']}")   
             self.bestairfoil['airfoil'].airfoil_plot()
-            print(self.bestairfoil['airfoil'].aerodynamics)
 
-    def save(self,):
-
+    def save(self, name : str):
         airfoil_coords = self.bestairfoil['airfoil'].get_coordinates()
-        with open("BORRAAAAR.dat", 'w') as f:
+        with open(f"{name}.dat", 'w') as f:
             f.write("Airfoil coordinates\n")
 
             for item in range(len(airfoil_coords[0])):
@@ -175,12 +176,20 @@ class Optimize:
                 f.write(str(airfoil_coords[1][item][0])+ '   '+str(airfoil_coords[1][item][1])+ '\n')
 
 
+    def reset(self, reynolds = None, cl_target = None):
+        options = {}
+        if reynolds is not None:
+            options['reynolds'] = reynolds
+            self.reynolds = reynolds
+        if cl_target is not None:
+            options['cl_target'] = cl_target
+            self.cl_target = cl_target
 
-            
-
+        self.env.reset(options=options)
+        self.bestairfoil = None
 
     def show(self,):
-        pass
+        self.bestairfoil['airfoil'].airfoil_plot()
 
 
 if __name__ == '__main__':
