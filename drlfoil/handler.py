@@ -3,6 +3,7 @@ import gymnasium as gym
 import numpy as np
 from stable_baselines3 import PPO
 from drlfoil import airfoil_env
+import copy
 
 class Optimize: 
     def __init__(self, model : str, cl_target : float, reynolds : float, logs : int = 1):
@@ -143,18 +144,40 @@ class Optimize:
                 print("*** Airfoil found with an efficiency of", info['efficiency'], "and lift coefficient of", info['cl'])
 
             if reward > self.bestairfoil['reward']:
-                self.bestairfoil = {'airfoil': obs, 'reward': reward, 'efficiency': info['efficiency'], 'cl': info['cl']}
+                self.bestairfoil = {'airfoil': copy.deepcopy(self.env.unwrapped.state), 
+                                    'reward': reward, 
+                                    'efficiency': info['efficiency'], 
+                                    'cl': info['cl']}
 
                 if self.logs == 3:
                     print("*** New best airfoil found!")
 
         if self.logs >= 1:
             print("*** Optimization finished! Time elapsed:", time.time()-start_time, "seconds")
-            print(f"    Best airfoil found with a reward of {self.bestairfoil['reward']}, lift coefficient of {self.bestairfoil['cl']} and efficiency of {self.bestairfoil['efficiency']}")   
-            self.env.unwrapped.state.airfoil_plot()
+            print(f"     Best airfoil found with a reward of {self.bestairfoil['reward']}, lift coefficient of {self.bestairfoil['cl']} and efficiency of {self.bestairfoil['efficiency']}")   
+            self.bestairfoil['airfoil'].airfoil_plot()
+            print(self.bestairfoil['airfoil'].aerodynamics)
 
     def save(self,):
-        pass
+
+        airfoil_coords = self.bestairfoil['airfoil'].get_coordinates()
+        with open("BORRAAAAR.dat", 'w') as f:
+            f.write("Airfoil coordinates\n")
+
+            for item in range(len(airfoil_coords[0])):
+                # Pass the first element since it is the same as the last element of the upper surface
+                f.write(str(airfoil_coords[0][item][0])+ '   '+str(airfoil_coords[0][item][1])+ '\n')
+
+            for item in range(len(airfoil_coords[1])):
+                # Pass the first element since it is the same as the last element of the upper surface
+                if item == 0:
+                    continue
+                f.write(str(airfoil_coords[1][item][0])+ '   '+str(airfoil_coords[1][item][1])+ '\n')
+
+
+
+            
+
 
     def show(self,):
         pass
