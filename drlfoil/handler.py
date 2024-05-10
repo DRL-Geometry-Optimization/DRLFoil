@@ -6,7 +6,7 @@ from drlfoil import airfoil_env
 import copy
 
 class Optimize: 
-    def __init__(self, model : str, cl_target : float, reynolds : float, steps : int = 10, logs : int = 1):
+    def __init__(self, model : str, cl_target : float, reynolds : float, boxes : list = [], steps : int = 10, logs : int = 1):
         """
         Class used to handle the optimization of the airfoil environment with the pre-trained models
 
@@ -48,12 +48,17 @@ class Optimize:
 
         self.bestairfoil = None # Placeholder for the best airfoil found
 
+        self.boxes = boxes
+
         if model == 'onebox':
             self.model_path = "models/onebox/onebox.zip"
             self.log_path = "models/onebox/log_onebox.txt"
 
             if self.logs >= 1:
                 print("*** Loading model from", self.model_path, "***")
+
+            if len(self.boxes) != 1:
+                raise ValueError("Onebox model requires one box restriction")
 
             start_time = time.time()
             # Load the environment with the parameters from the log file and cl targey & reynolds defined by the user
@@ -69,7 +74,8 @@ class Optimize:
                            cl_wide = float(_find_values(self.log_path, 'cl_wide')),
                            render_mode="human",
                            n_boxes=1,
-                           reynolds = self.reynolds)
+                           reynolds = self.reynolds,
+                           boxes = self.boxes)
             self.model = PPO.load(self.model_path, env=self.env)
 
             if self.logs >= 2:
@@ -81,6 +87,10 @@ class Optimize:
 
             if self.logs >= 1:
                 print("*** Loading model from", self.model_path, "***")
+
+            if len(self.boxes) != 2:
+                raise ValueError("Twobox model requires two box restrictions")
+            
             start_time = time.time()
             # Load the environment with the parameters from the log file and cl targey & reynolds defined by the user
             self.env = gym.make('AirfoilEnv-v0', 
@@ -95,7 +105,8 @@ class Optimize:
                            cl_wide = float(_find_values(self.log_path, 'cl_wide')),
                            render_mode="human",
                            n_boxes=2,
-                           reynolds = self.reynolds)
+                           reynolds = self.reynolds,
+                           boxes = self.boxes)
             self.model = PPO.load(self.model_path, env=self.env)
             if self.logs >= 2:
                 print("*** Model loaded in", time.time()-start_time, "seconds")
@@ -106,6 +117,9 @@ class Optimize:
 
             if self.logs >= 1:
                 print("*** Loading model from", self.model_path, "***")
+
+            if len(self.boxes) != 0:
+                raise ValueError("Nobox model requires no box restrictions")
 
             start_time = time.time()
             # Load the environment with the parameters from the log file and cl targey & reynolds defined by the user

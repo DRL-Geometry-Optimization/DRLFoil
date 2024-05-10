@@ -30,7 +30,8 @@ class AirfoilEnv(gym.Env):
                  cl_reward : bool = True, cl_reset : float = None, cl_wide : float = 20, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
                  efficiency_param : float = 1, # Efficiency weight parameter
-                 n_boxes : int = 1, reynolds : int = 1e6): # Number of boxes in the airfoil
+                 n_boxes : int = 1, boxes : list = None, # Box parameters
+                 reynolds : int = 1e6): # Number of boxes in the airfoil
         
         """
         Initialize the environment with the following parameters:
@@ -89,6 +90,15 @@ class AirfoilEnv(gym.Env):
             raise ValueError(f"The number of boxes is limited to {self._BOX_LIMIT}")
         else:
             self.n_boxes = n_boxes
+
+        if self.n_boxes > 0:
+            if boxes is not None:
+                if len(boxes) != self.n_boxes:
+                    raise ValueError(f"The number of boxes should be equal to {self.n_boxes}")
+                else:
+                    self.boxes = boxes
+            else:
+                self.boxes = None
 
 
         self.reynolds = reynolds
@@ -182,13 +192,21 @@ class AirfoilEnv(gym.Env):
         
         if self.n_boxes == 0:
             pass
+
         elif self.n_boxes == 1:
-            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
+            if self.boxes is None: # If the boxes are not defined, create random boxes
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
+            else: # If the boxes are defined, use them
+                self.state.get_boxes(self.boxes[0])
+
         elif self.n_boxes == 2:
-            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
-                                                           xmax=0.5))
-            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
-                                                           xmin=0.5))
+            if self.boxes is None: # If the boxes are not defined, create random boxes
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
+                                                            xmax=0.5))
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
+                                                            xmin=0.5))
+            else: # If the boxes are defined, use them
+                self.state.get_boxes(self.boxes[0], self.boxes[1])
             
         if self.random_reynolds == True:
             self.reynolds = random.uniform(self._RE_MIN, self._RE_MAX)
