@@ -21,9 +21,9 @@ class AirfoilEnv(gym.Env):
 
     _BOX_LIMIT = 2 # Maximum number of boxes in the airfoil
     _CL_MIN = 0.1 # Minimum Cl value for the airfoil
-    _CL_MAX = 1.7 # Maximum Cl value for the airfoil
-    _RE_MIN = 1e4 # Minimum Reynolds number
-    _RE_MAX = 1e8 # Maximum Reynolds number
+    _CL_MAX = 1.6 # Maximum Cl value for the airfoil
+    _RE_MIN = 1e5 # Minimum Reynolds number
+    _RE_MAX = 5e7 # Maximum Reynolds number
 
     def __init__(self, render_mode : bool = None, max_steps : int = 10, reward_threshold : bool = None, # Environment parameters
                  n_params : int = 10, scale_actions : float = 0.15, airfoil_seed : np.ndarray = [0.1*np.ones(10), -0.1*np.ones(10), 0.0], # Initial state of the environment
@@ -72,11 +72,21 @@ class AirfoilEnv(gym.Env):
         self.delta_reward = delta_reward
         self.efficiency_param = efficiency_param
         self.scale_actions = scale_actions
-        self.airfoil_seed = airfoil_seed
+        
+        
 
         # Create the airfoil object
         self.state = AirfoilTools() 
         self.n_params = n_params # Number of parameters in one side of the airfoil
+
+        if airfoil_seed is None:
+            self.state.kulfan(upper_weights=0.1*np.ones(self.n_params), lower_weights=-0.1*np.ones(self.n_params), leading_edge_weight=0.0) # Initialize the airfoil with the Kulfan parametrization
+        elif airfoil_seed is not None and len(airfoil_seed[0]) != self.n_params and len(airfoil_seed[1]) != self.n_params:
+            raise ValueError(f"The number of parameters in the airfoil seed should be equal to {self.n_params}")
+        
+        self.airfoil_seed = airfoil_seed
+
+
 
         # Initialize the environment state
         self.done = False 
@@ -165,7 +175,7 @@ class AirfoilEnv(gym.Env):
             observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
 
         if self.no_reynolds is False:
-            observation["reynolds"] = np.array([self.reynolds / 1e7], dtype=np.float32)
+            observation["reynolds"] = np.array([self.reynolds / self._RE_MAX], dtype=np.float32) # Normalize the reynolds number between 0 and 1
 
         return observation
 
@@ -179,8 +189,8 @@ class AirfoilEnv(gym.Env):
         if self.airfoil_seed is not None:
             self.state.kulfan(upper_weights=self.airfoil_seed[0], lower_weights=self.airfoil_seed[1], leading_edge_weight=self.airfoil_seed[2])
         else:
-            raise NotImplementedError("Due to a mistake, it is necessary to implement the airfoil_seed parameter in the reset method. random kulfan needs an airfoil declaration first")
-            self.state.random_kulfan2(n_params= self.n_params)
+            #raise NotImplementedError("Due to a mistake, it is necessary to implement the airfoil_seed parameter in the reset method. random kulfan needs an airfoil declaration first")
+            self.state.random_kulfan2()
 
 
         # Box reset
@@ -195,15 +205,15 @@ class AirfoilEnv(gym.Env):
 
         elif self.n_boxes == 1:
             if self.boxes is None: # If the boxes are not defined, create random boxes
-                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.1, ymax=0.10, widthmax=0.55, heightmax=0.15))
             else: # If the boxes are defined, use them
                 self.state.get_boxes(self.boxes[0])
 
         elif self.n_boxes == 2:
             if self.boxes is None: # If the boxes are not defined, create random boxes
-                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.10, widthmax=0.5, heightmax=0.15,
                                                             xmax=0.5))
-                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.10, widthmax=0.5, heightmax=0.10,
                                                             xmin=0.5))
             else: # If the boxes are defined, use them
                 self.state.get_boxes(self.boxes[0], self.boxes[1])
