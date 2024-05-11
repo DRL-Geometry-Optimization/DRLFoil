@@ -63,7 +63,7 @@ def test_airfoil_env_obs():
 
 def test_limits_reynolds():
     with pytest.raises(Exception):
-        env = AirfoilEnv(n_boxes=1, reynolds=1e8, cl_reset=None, max_steps=2, render_mode="no_display",
+        env = AirfoilEnv(n_boxes=1, reynolds=1e10, cl_reset=None, max_steps=2, render_mode="no_display",
                          airfoil_seed=[0.1*np.ones(10), -0.1*np.ones(10), 0.0])
         
 
