@@ -2,11 +2,10 @@ import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 
-import sys
-sys.path.append('drlfoil/')
+import drlfoil
+from drlfoil.recorder.create_log import CreateLog
 
 import gymnasium as gym
-import airfoil_env
 import numpy as np
 import os
 from stable_baselines3 import PPO
@@ -16,7 +15,6 @@ from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.env_util import make_vec_env
 from datetime import date
-from recorder.create_log import CreateLog
 import torch.nn as nn
 
 # tensorboard --logdir .\logs\tensorboard_logs\FECHA\MODELO
@@ -26,7 +24,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "8Param_RandomReynolds_TwoBox_OptunaBest"
+name = "3M_OneBox_TestRandomAirfoil_SeedNone_ReMin1e5_ReMax5e7_CLmax1.6"
 ############################### MODEL NAME ########################################
 
 
@@ -35,7 +33,8 @@ name = "8Param_RandomReynolds_TwoBox_OptunaBest"
 n_params = 8
 max_steps = 10
 scale_actions = 0.15
-airfoil_seed = [0.1*np.ones(n_params), -0.1*np.ones(n_params), 0.0]
+#airfoil_seed = [0.1*np.ones(n_params), -0.1*np.ones(n_params), 0.0]
+airfoil_seed = None
 delta_reward = False
 cl_reward = True
 cl_reset = None
@@ -49,9 +48,9 @@ env_id = 'AirfoilEnv-v0'
 
 net_arch = [256, 256, 256]
 activation_fn = nn.Tanh
-total_timesteps = 2000000
+total_timesteps = 3000000
 
-n_boxes = 2 
+n_boxes = 1
 reynolds = None
 
 gamma = 0.995
@@ -72,7 +71,7 @@ vf_coef = 0.754843
 # Model name
 MODEL_NAME = f"{formatted_date}_{name}"
 # Model directory
-MODEL_DIR = f"./models/{formatted_date}/{MODEL_NAME}"
+MODEL_DIR = f"./logmodels/{formatted_date}/{MODEL_NAME}"
 # Log directory
 LOG_DIR = f"{MODEL_DIR}/logs"
 # Tensorboard directory

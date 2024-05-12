@@ -21,16 +21,17 @@ class AirfoilEnv(gym.Env):
 
     _BOX_LIMIT = 2 # Maximum number of boxes in the airfoil
     _CL_MIN = 0.1 # Minimum Cl value for the airfoil
-    _CL_MAX = 1.3 # Maximum Cl value for the airfoil
-    _RE_MIN = 1e4 # Minimum Reynolds number
-    _RE_MAX = 1e7 # Maximum Reynolds number
+    _CL_MAX = 1.6 # Maximum Cl value for the airfoil
+    _RE_MIN = 1e5 # Minimum Reynolds number
+    _RE_MAX = 5e7 # Maximum Reynolds number
 
     def __init__(self, render_mode : bool = None, max_steps : int = 10, reward_threshold : bool = None, # Environment parameters
                  n_params : int = 10, scale_actions : float = 0.15, airfoil_seed : np.ndarray = [0.1*np.ones(10), -0.1*np.ones(10), 0.0], # Initial state of the environment
                  cl_reward : bool = True, cl_reset : float = None, cl_wide : float = 20, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
                  efficiency_param : float = 1, # Efficiency weight parameter
-                 n_boxes : int = 1, reynolds : int = 1e6): # Number of boxes in the airfoil
+                 n_boxes : int = 1, boxes : list = None, # Box parameters
+                 reynolds : int = 1e6): # Number of boxes in the airfoil
         
         """
         Initialize the environment with the following parameters:
@@ -71,11 +72,21 @@ class AirfoilEnv(gym.Env):
         self.delta_reward = delta_reward
         self.efficiency_param = efficiency_param
         self.scale_actions = scale_actions
-        self.airfoil_seed = airfoil_seed
+        
+        
 
         # Create the airfoil object
         self.state = AirfoilTools() 
         self.n_params = n_params # Number of parameters in one side of the airfoil
+
+        if airfoil_seed is None:
+            self.state.kulfan(upper_weights=0.1*np.ones(self.n_params), lower_weights=-0.1*np.ones(self.n_params), leading_edge_weight=0.0) # Initialize the airfoil with the Kulfan parametrization
+        elif airfoil_seed is not None and len(airfoil_seed[0]) != self.n_params and len(airfoil_seed[1]) != self.n_params:
+            raise ValueError(f"The number of parameters in the airfoil seed should be equal to {self.n_params}")
+        
+        self.airfoil_seed = airfoil_seed
+
+
 
         # Initialize the environment state
         self.done = False 
@@ -90,11 +101,20 @@ class AirfoilEnv(gym.Env):
         else:
             self.n_boxes = n_boxes
 
+        if self.n_boxes > 0:
+            if boxes is not None:
+                if len(boxes) != self.n_boxes:
+                    raise ValueError(f"The number of boxes should be equal to {self.n_boxes}")
+                else:
+                    self.boxes = boxes
+            else:
+                self.boxes = None
+
 
         self.reynolds = reynolds
 
-        self.random_reynolds = False # Placeholder for the random reynolds number. If reynolds is -1, it will be True
-        self.no_reynolds = False # Placeholder for the case where reynolds is None
+        self.random_reynolds = False # Placeholder for the random reynolds number. If reynolds is None, it will be True
+        self.no_reynolds = False # Placeholder for the case where reynolds is -1 and it is not used as an observation (using this is not recommended)
 
         # Check reynolds number
         if self.reynolds is not None:
@@ -155,22 +175,22 @@ class AirfoilEnv(gym.Env):
             observation["cl_target"] = np.array([self.cl_target], dtype=np.float32)
 
         if self.no_reynolds is False:
-            observation["reynolds"] = np.array([self.reynolds / 1e7], dtype=np.float32)
+            observation["reynolds"] = np.array([self.reynolds / self._RE_MAX], dtype=np.float32) # Normalize the reynolds number between 0 and 1
 
         return observation
 
 
 
 
-    def reset(self, seed=None, options=None):
+    def reset(self, seed=None, options={}):
 
         super().reset(seed=seed)
         # Reset the environment state 
         if self.airfoil_seed is not None:
             self.state.kulfan(upper_weights=self.airfoil_seed[0], lower_weights=self.airfoil_seed[1], leading_edge_weight=self.airfoil_seed[2])
         else:
-            raise NotImplementedError("Due to a mistake, it is necessary to implement the airfoil_seed parameter in the reset method. random kulfan needs an airfoil declaration first")
-            self.state.random_kulfan2(n_params= self.n_params)
+            #raise NotImplementedError("Due to a mistake, it is necessary to implement the airfoil_seed parameter in the reset method. random kulfan needs an airfoil declaration first")
+            self.state.random_kulfan2()
 
 
         # Box reset
@@ -182,18 +202,34 @@ class AirfoilEnv(gym.Env):
         
         if self.n_boxes == 0:
             pass
+
         elif self.n_boxes == 1:
-            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
+            if self.boxes is None: # If the boxes are not defined, create random boxes
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.1, ymax=0.10, widthmax=0.55, heightmax=0.15))
+            else: # If the boxes are defined, use them
+                self.state.get_boxes(self.boxes[0])
+
         elif self.n_boxes == 2:
-            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
-                                                           xmax=0.5))
-            self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08,
-                                                           xmin=0.5))
+            if self.boxes is None: # If the boxes are not defined, create random boxes
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.10, widthmax=0.5, heightmax=0.15,
+                                                            xmax=0.5))
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.10, widthmax=0.5, heightmax=0.10,
+                                                            xmin=0.5))
+            else: # If the boxes are defined, use them
+                self.state.get_boxes(self.boxes[0], self.boxes[1])
             
         if self.random_reynolds == True:
             self.reynolds = random.uniform(self._RE_MIN, self._RE_MAX)
 
+        ############################ Temporal solution for the reynolds number ############################
 
+        if 'reynolds' in options:
+            self.reynolds = options['reynolds']
+            if self.reynolds < self._RE_MIN or self.reynolds > self._RE_MAX:
+                raise ValueError(f"Reynolds number is out of range. It should be between {self._RE_MIN} and {self._RE_MAX}")
+            self.random_reynolds = False # If it is not done, will be randomly generated after one reset
+
+        #############################################################################################
 
         self.done = False
         self.step_counter = 0
@@ -201,7 +237,15 @@ class AirfoilEnv(gym.Env):
         if self.cl_reward == True and self.cl_reset is None:
             self.cl_target = random.uniform(self._CL_MIN, self._CL_MAX)
 
+        ############################ Temporal solution for the cl target ############################
 
+        if 'cl_target' in options:
+            self.cl_target = options['cl_target']
+            self.cl_reset = self.cl_target
+            if self.cl_target < self._CL_MIN or self.cl_target > self._CL_MAX:
+                raise ValueError(f"cl_target is out of range. It should be between {self._CL_MIN} and {self._CL_MAX}")
+
+        #############################################################################################
 
         self.state.analysis(re=self.reynolds) # Analyze the airfoil
         self.last_efficiency = self.state.get_efficiency()
