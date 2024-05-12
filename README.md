@@ -2,6 +2,9 @@
 
 DRLFoil (*Deep Reinforcement Learning Foil*) is a library developed to provide an optimization framework where you can specify lift coefficient and dimensional constraints. The project began development in the context of a Final Degree Thesis, and it is currently in the alpha stage, so all contributions and feedback are appreciated!
 
+## Current Status
+*DRLFoil is currently under development, as is the documentation. If you would like to contribute to its development, please contact me or submit a pull request. The first release is coming soon!*
+
 ## Overview
 DRLFoil works with three main libraries:
 - **Neuralfoil**: This library works with Physics-Informed Neural Networks trained with XFoil, making the iterations significantly faster than with the aforementioned software.
