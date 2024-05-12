@@ -56,8 +56,8 @@ class Optimize:
         self.boxes = boxes
 
         if model == 'onebox':
-            self.model_path = "models/onebox/onebox.zip"
-            self.log_path = "models/onebox/log_onebox.txt"
+            self.model_path = "drlfoil/models/onebox/onebox.zip"
+            self.log_path = "drlfoil/models/onebox/log_onebox.txt"
 
             if self.logs >= 1:
                 print("*** Loading model from", self.model_path, "***")
@@ -87,8 +87,8 @@ class Optimize:
                 print("*** Model loaded in", time.time()-start_time, "seconds")
 
         elif model == 'twobox':
-            self.model_path = "models/twobox/twobox.zip"
-            self.log_path = "models/twobox/log_twobox.txt"
+            self.model_path = "drlfoil/models/twobox/twobox.zip"
+            self.log_path = "drlfoil/models/twobox/log_twobox.txt"
 
             if self.logs >= 1:
                 print("*** Loading model from", self.model_path, "***")
@@ -117,8 +117,8 @@ class Optimize:
                 print("*** Model loaded in", time.time()-start_time, "seconds")
 
         elif model == 'nobox':
-            self.model_path = "models/nobox/nobox.zip"
-            self.log_path = "models/nobox/log_nobox.txt"
+            self.model_path = "drlfoil/models/nobox/nobox.zip"
+            self.log_path = "drlfoil/models/nobox/log_nobox.txt"
 
             if self.logs >= 1:
                 print("*** Loading model from", self.model_path, "***")
