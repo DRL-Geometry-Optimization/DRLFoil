@@ -3,6 +3,7 @@ import gymnasium as gym
 import numpy as np
 from stable_baselines3 import PPO
 from drlfoil import airfoil_env
+from drlfoil.utilities import AeroAnalysis
 import copy
 
 class Optimize: 
@@ -14,6 +15,9 @@ class Optimize:
         -model: Define the model to be used. Available models are: 'onebox', 'twobox', 'nobox' 
         -cl_target: Define the target lift coefficient
         -reynolds: Define the Reynolds number of the flow
+        -boxes: Define the box restrictions for the airfoil. It is a list of BoxRestriction objects
+        -steps: Define the number of steps to run the optimization
+        -logs: Define the level of logs to be shown. 0: No logs, 1: Simple optimization data, 2: Simple optimization data and optimization time, 3: All about the optimization and the airfoils found
         """
 
         def _find_values(filename : str, key: str):
@@ -47,6 +51,7 @@ class Optimize:
         self.steps = steps
 
         self.bestairfoil = None # Placeholder for the best airfoil found
+        self.bestairfoil_reward = -np.inf
 
         self.boxes = boxes
 
@@ -151,7 +156,8 @@ class Optimize:
         start_time = time.time()
         done = False
         obs, _ = self.env.reset()
-        self.bestairfoil = {'airfoil': None, 'reward': -np.inf}
+        self.bestairfoil = None # Placeholder for the best airfoil found (AirfoilTools object)
+        self.bestairfoil_reward = -np.inf
         while not done:
             action, _states = self.model.predict(obs, deterministic=True)
             obs, reward, done, _, info = self.env.step(action)
@@ -159,11 +165,9 @@ class Optimize:
             if self.logs == 3:
                 print("*** Airfoil found with an efficiency of", info['efficiency'], "and lift coefficient of", info['cl'])
 
-            if reward > self.bestairfoil['reward']:
-                self.bestairfoil = {'airfoil': copy.deepcopy(self.env.unwrapped.state), 
-                                    'reward': reward, 
-                                    'efficiency': info['efficiency'], 
-                                    'cl': info['cl']}
+            if reward > self.bestairfoil_reward:
+                self.bestairfoil = copy.deepcopy(self.env.unwrapped.state)
+                self.bestairfoil_reward = reward
 
                 if self.logs == 3:
                     print("*** New best airfoil found!")
@@ -171,13 +175,20 @@ class Optimize:
         if self.logs >= 2:
             print("*** Optimization finished! Time elapsed:", time.time()-start_time, "seconds")
         if self.logs >= 1:
-            print(f"***Best airfoil found with a reward of {self.bestairfoil['reward']}, lift coefficient of {self.bestairfoil['cl']} (target: {self.cl_target}) and efficiency of {self.bestairfoil['efficiency']}")   
-            self.bestairfoil['airfoil'].airfoil_plot()
+            print(f"***Best airfoil found with a lift coefficient of {self.bestairfoil.get_cl()} (target: {self.cl_target}) and efficiency of {self.bestairfoil.get_efficiency()}")   
+            self.bestairfoil.airfoil_plot()
 
     def save(self, name : str):
-        airfoil_coords = self.bestairfoil['airfoil'].get_coordinates()
+        """
+        Function used to save the best airfoil found in a .dat file with the name given by the user
+
+        Args:
+        -name: Name of the file
+        """
+
+        airfoil_coords = self.bestairfoil.get_coordinates()
         with open(f"{name}.dat", 'w') as f:
-            f.write("Airfoil coordinates\n")
+            f.write(f"{name}\n")
 
             for item in range(len(airfoil_coords[0])):
                 # Pass the first element since it is the same as the last element of the upper surface
@@ -190,7 +201,15 @@ class Optimize:
                 f.write(str(airfoil_coords[1][item][0])+ '   '+str(airfoil_coords[1][item][1])+ '\n')
 
 
-    def reset(self, reynolds = None, cl_target = None):
+    def reset(self, reynolds = None, cl_target = None) -> None:
+        """
+        Used to reset the environment with new parameters. If no parameters are given, the environment is reset with the same parameters as before.
+
+        Args:
+        -reynolds: Reynolds number of the flow
+        -cl_target: Target lift coefficient
+        """
+
         options = {}
         if reynolds is not None:
             options['reynolds'] = reynolds
@@ -202,11 +221,24 @@ class Optimize:
         self.env.reset(options=options)
         self.bestairfoil = None
 
-    def show(self,):
-        self.bestairfoil['airfoil'].airfoil_plot()
+    def show(self,) -> None:
+        """
+        Plot the airfoil found
+        """
 
+        if self.bestairfoil is None:
+            raise ValueError("No airfoil found yet. You have to run the optimization first. If you want analyze a different airfoil, check drfoil.utilities")
+        self.bestairfoil.airfoil_plot()
 
-if __name__ == '__main__':
-    pedro = Optimize('onebox', 0.5, 1000000)
-    print(pedro.model)
-    pedro.model.reset()
+    def analyze(self, plot : bool = False) -> dict:
+        """
+        Analyze the airfoil found using Neuralfoil. It returns a dictionary with the lift coefficient, drag coefficient and efficiency for each angle of attack.
+
+        Args:
+        -plot: If True, it plots the lift coefficient, drag coefficient and efficiency against the angle of attack
+        """
+        if self.bestairfoil is None:
+            raise ValueError("No airfoil found yet. You have to run the optimization first. If you want analyze a different airfoil, check drfoil.utilities")
+        return AeroAnalysis(self.bestairfoil, reynolds=self.reynolds, plot=plot)
+
+    
