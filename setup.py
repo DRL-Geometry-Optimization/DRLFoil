@@ -9,7 +9,7 @@ setup(
     author_email='pablo.magarinos@outlook.com',
     license='MIT',
     install_requires=[
-        'torch==2.3.0+cu121',
+        'torch==2.3.0',
         'stable-baselines3[extra]==2.3.1',
         'AeroSandbox==4.2.2',
         'gymnasium==0.29.1',
