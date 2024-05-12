@@ -7,3 +7,13 @@ DRLFoil works with three main libraries:
 - **Stable Baselines 3**: This is one of the most popular Reinforcement Learning libraries, providing the most important algorithms and tools for developing models.
 - **Gymnasium**: An OpenAI framework that simplifies the creation of environments for deployment. It is fully compatible with SB3.
 
+As it is developed by an aerospace engineer for other engineers, one of the main objectives was making it easy to use, removing innecesary steps and making tools the most accessible possible.
+Optimizing an airfoils is as much easy as writing a few lines of code:
+
+```python
+import drlfoil
+from drlfoil import BoxRestriction
+
+optimization = drlfoil.Optimize('onebox', cl = 0.8, reynolds = 1e7, boxes=[BoxRestriction(0.4, 0.0, 0.4, 0.15)])
+optimization.run()
+```
