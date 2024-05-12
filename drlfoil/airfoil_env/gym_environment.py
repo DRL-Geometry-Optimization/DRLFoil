@@ -113,8 +113,8 @@ class AirfoilEnv(gym.Env):
 
         self.reynolds = reynolds
 
-        self.random_reynolds = False # Placeholder for the random reynolds number. If reynolds is -1, it will be True
-        self.no_reynolds = False # Placeholder for the case where reynolds is None
+        self.random_reynolds = False # Placeholder for the random reynolds number. If reynolds is None, it will be True
+        self.no_reynolds = False # Placeholder for the case where reynolds is -1 and it is not used as an observation (using this is not recommended)
 
         # Check reynolds number
         if self.reynolds is not None:
@@ -227,7 +227,7 @@ class AirfoilEnv(gym.Env):
             self.reynolds = options['reynolds']
             if self.reynolds < self._RE_MIN or self.reynolds > self._RE_MAX:
                 raise ValueError(f"Reynolds number is out of range. It should be between {self._RE_MIN} and {self._RE_MAX}")
-            print(f"Reynolds number set to {options['reynolds']}. Don't forget to create a setter for the reynolds number in the environment.")
+            self.random_reynolds = False # If it is not done, will be randomly generated after one reset
 
         #############################################################################################
 
@@ -241,6 +241,7 @@ class AirfoilEnv(gym.Env):
 
         if 'cl_target' in options:
             self.cl_target = options['cl_target']
+            self.cl_reset = self.cl_target
             if self.cl_target < self._CL_MIN or self.cl_target > self._CL_MAX:
                 raise ValueError(f"cl_target is out of range. It should be between {self._CL_MIN} and {self._CL_MAX}")
 
