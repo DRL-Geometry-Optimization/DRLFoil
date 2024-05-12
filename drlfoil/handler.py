@@ -6,6 +6,10 @@ from drlfoil import airfoil_env
 from drlfoil.utilities import AeroAnalysis
 import copy
 
+import os
+
+
+
 class Optimize: 
     def __init__(self, model : str, cl_target : float, reynolds : float, boxes : list = [], steps : int = 10, logs : int = 1):
         """
@@ -56,8 +60,15 @@ class Optimize:
         self.boxes = boxes
 
         if model == 'onebox':
-            self.model_path = "drlfoil/models/onebox/onebox.zip"
-            self.log_path = "drlfoil/models/onebox/log_onebox.txt"
+
+            # Obtiene la ruta del directorio donde se encuentra el script actual
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+
+            # Construye la ruta al modelo de manera relativa al script
+            self.model_path = os.path.join(current_dir, "models", "onebox", "onebox.zip")
+            #self.model_path = "drlfoil/models/onebox/onebox.zip"
+            #self.log_path = "drlfoil/models/onebox/log_onebox.txt"
+            self.log_path = os.path.join(current_dir, "models", "onebox", "log_onebox.txt")
 
             if self.logs >= 1:
                 print("*** Loading model from", self.model_path, "***")
@@ -87,8 +98,14 @@ class Optimize:
                 print("*** Model loaded in", time.time()-start_time, "seconds")
 
         elif model == 'twobox':
-            self.model_path = "drlfoil/models/twobox/twobox.zip"
-            self.log_path = "drlfoil/models/twobox/log_twobox.txt"
+            # Obtiene la ruta del directorio donde se encuentra el script actual
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+
+            # Construye la ruta al modelo de manera relativa al script
+            self.model_path = os.path.join(current_dir, "models", "twobox", "twobox.zip")
+            #self.model_path = "drlfoil/models/onebox/onebox.zip"
+            #self.log_path = "drlfoil/models/onebox/log_onebox.txt"
+            self.log_path = os.path.join(current_dir, "models", "twobox", "log_twobox.txt")
 
             if self.logs >= 1:
                 print("*** Loading model from", self.model_path, "***")
@@ -117,8 +134,14 @@ class Optimize:
                 print("*** Model loaded in", time.time()-start_time, "seconds")
 
         elif model == 'nobox':
-            self.model_path = "drlfoil/models/nobox/nobox.zip"
-            self.log_path = "drlfoil/models/nobox/log_nobox.txt"
+            # Obtiene la ruta del directorio donde se encuentra el script actual
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+
+            # Construye la ruta al modelo de manera relativa al script
+            self.model_path = os.path.join(current_dir, "models", "nobox", "nobox.zip")
+            #self.model_path = "drlfoil/models/onebox/onebox.zip"
+            #self.log_path = "drlfoil/models/onebox/log_onebox.txt"
+            self.log_path = os.path.join(current_dir, "models", "nobox", "log_nobox.txt")
 
             if self.logs >= 1:
                 print("*** Loading model from", self.model_path, "***")
