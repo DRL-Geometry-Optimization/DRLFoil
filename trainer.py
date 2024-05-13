@@ -24,17 +24,17 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "3M_OneBox_TestRandomAirfoil_SeedNone_ReMin1e5_ReMax5e7_CLmax1.6"
+name = "3.5M_OneBox_Seed0.1_ReMin1e5_ReMax5e7_CLmax1.6"
 ############################### MODEL NAME ########################################
 
-
+   
 
 ############################ HYPERPARAMETERS #####################################
 n_params = 8
 max_steps = 10
 scale_actions = 0.15
-#airfoil_seed = [0.1*np.ones(n_params), -0.1*np.ones(n_params), 0.0]
-airfoil_seed = None
+airfoil_seed = [0.1*np.ones(n_params), -0.1*np.ones(n_params), 0.0]
+#airfoil_seed = None
 delta_reward = False
 cl_reward = True
 cl_reset = None
@@ -48,7 +48,7 @@ env_id = 'AirfoilEnv-v0'
 
 net_arch = [256, 256, 256]
 activation_fn = nn.Tanh
-total_timesteps = 3000000
+total_timesteps = 3500000
 
 n_boxes = 1
 reynolds = None
