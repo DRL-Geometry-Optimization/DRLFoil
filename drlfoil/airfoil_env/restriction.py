@@ -9,8 +9,8 @@ class BoxRestriction:
 
     _XMIN = 0.1
     _XMAX = 0.8
-    _YMIN = -0.3
-    _YMAX = 0.3
+    _YMIN = -0.25
+    _YMAX = 0.25
 
     def __init__(self, posx : float, posy : float, width : float, height : float) -> None:
         """
