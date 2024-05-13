@@ -142,7 +142,7 @@ class AirfoilEnv(gym.Env):
             obs_dict["boxes"] = spaces.Box(low=-5.0, high=5.0, shape=(4*self.n_boxes,), dtype=np.float32)
 
         if self.no_reynolds == False:
-            obs_dict["reynolds"] = spaces.Box(low=0, high=1, shape=(1,), dtype=np.float32)
+            obs_dict["reynolds"] = spaces.Box(low=0, high=1.0, shape=(1,), dtype=np.float32)
 
         self.observation_space = spaces.Dict(obs_dict)
 
@@ -206,7 +206,7 @@ class AirfoilEnv(gym.Env):
         elif self.n_boxes == 1:
             if self.boxes is None: # If the boxes are not defined, create random boxes
                 #self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.1, ymax=0.10, widthmax=0.55, heightmax=0.15))
-                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, widthmax=0.55, heightmax=0.2))
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.07, ymax=0.17, widthmax=0.55, heightmax=0.17))
             else: # If the boxes are defined, use them
                 self.state.get_boxes(self.boxes[0])
 
@@ -214,7 +214,7 @@ class AirfoilEnv(gym.Env):
             if self.boxes is None: # If the boxes are not defined, create random boxes
                 #self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.10, widthmax=0.5, heightmax=0.15, xmax=0.5))
                 #self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.10, widthmax=0.5, heightmax=0.10, xmin=0.5))
-                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.20, widthmax=0.5, heightmax=0.2, xmax=0.5))
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.17, widthmax=0.5, heightmax=0.17, xmax=0.5))
                 self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.10, widthmax=0.5, heightmax=0.10, xmin=0.5))
             else: # If the boxes are defined, use them
                 self.state.get_boxes(self.boxes[0], self.boxes[1])
