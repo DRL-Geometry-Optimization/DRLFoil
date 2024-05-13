@@ -1,3 +1,3 @@
-from .handler import Optimize
+from .optimize import Optimize
 
 from .airfoil_env.restriction import BoxRestriction
