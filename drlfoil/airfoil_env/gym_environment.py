@@ -206,7 +206,7 @@ class AirfoilEnv(gym.Env):
         elif self.n_boxes == 1:
             if self.boxes is None: # If the boxes are not defined, create random boxes
                 #self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.1, ymax=0.10, widthmax=0.55, heightmax=0.15))
-                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.07, ymax=0.17, widthmax=0.55, heightmax=0.17))
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.12, widthmax=0.55, heightmax=0.12))
             else: # If the boxes are defined, use them
                 self.state.get_boxes(self.boxes[0])
 
@@ -214,8 +214,8 @@ class AirfoilEnv(gym.Env):
             if self.boxes is None: # If the boxes are not defined, create random boxes
                 #self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.10, widthmax=0.5, heightmax=0.15, xmax=0.5))
                 #self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.10, widthmax=0.5, heightmax=0.10, xmin=0.5))
-                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.17, widthmax=0.5, heightmax=0.17, xmax=0.5))
-                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.10, widthmax=0.5, heightmax=0.10, xmin=0.5))
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.10, ymax=0.12, widthmax=0.5, heightmax=0.12, xmax=0.5))
+                self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.5, heightmax=0.1, xmin=0.5))
             else: # If the boxes are defined, use them
                 self.state.get_boxes(self.boxes[0], self.boxes[1])
             
