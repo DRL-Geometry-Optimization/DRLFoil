@@ -3,7 +3,7 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 
 import drlfoil
-from drlfoil.recorder.create_log import CreateLog
+from drlfoil.recorder import CreateLog
 
 import gymnasium as gym
 import numpy as np
@@ -24,7 +24,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "3.5M_OneBox_Seed0.1_ReMin1e5_ReMax5e7_CLmax1.6"
+name = "borrar"
 ############################### MODEL NAME ########################################
 
    
