@@ -82,8 +82,6 @@ class BoxRestriction:
         else:
             raise IndexError("Index out of range. It must be between 0 and 3")
     
-    def box_params(self):
-        pass
 
     def coordinates(self) -> tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]]:
         """
