@@ -21,8 +21,6 @@ def _make_env(env_id: str, rank: int, n_params: int, max_steps: int,
     This function is defined outside of the Train class to avoid serialization issues
     with Python's multiprocessing module.
     """
-
-
     def _init():
         env = gym.make(env_id, 
                        n_params=n_params, 
@@ -42,8 +40,9 @@ def _make_env(env_id: str, rank: int, n_params: int, max_steps: int,
     return _init
 
 
+
 class Train:
-    def __init__(self, modelname : str, name_date : bool = False):
+    def __init__(self, modelname : str, dir : str, name_date : bool = False):
         
         self.modelname = modelname
         if name_date:
@@ -51,6 +50,8 @@ class Train:
             formatted_date = today.strftime("%d%m%y")
             self.modelname = self.modelname + "_" + formatted_date
 
+        self.dir = dir
+        
 
         self.vec_env = None
         self.test_env = None
