@@ -1,4 +1,6 @@
-from drlfoil import Train
+from drlfoil import Train, Optimize
+import drlfoil
+import drlfoil.utilities
 
 if __name__ == '__main__':
     camion = Train("camion")
