@@ -7,6 +7,6 @@ register(
 
 
 from .gym_environment import AirfoilEnv
-from .parametrization import AirfoilTools
+from .parametrization import airfoiltools
 from .restriction import BoxRestriction, plot_boxes
 from .reward import reward

@@ -10,7 +10,7 @@ from .restriction import BoxRestriction
 
 
 
-class AirfoilTools:
+class airfoiltools:
     """
     This class provides tools for working with one airfoil. It can create an airfoil with the Kulfan parameterization
     and analyze. It also provides methods for modifying the airfoil and getting the weights of the airfoil.

@@ -1,8 +1,8 @@
-from ..airfoil_env.parametrization import AirfoilTools
+from ..airfoil_env.parametrization import airfoiltools
 import numpy as np
 import matplotlib.pyplot as plt
 
-def AeroAnalysis(airfoil : AirfoilTools, reynolds : int = 1e6, plot : bool = False):
+def AeroAnalysis(airfoil : airfoiltools, reynolds : int = 1e6, plot : bool = False):
     alpha_list = []
     cl_list = []
     cd_list = []
