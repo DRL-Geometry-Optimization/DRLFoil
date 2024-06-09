@@ -3,9 +3,8 @@ import gymnasium as gym
 from gymnasium import spaces
 import random
 
-from .parametrization import airfoiltools
+from .parametrization import AirfoilTools
 from .reward import reward
-from .restriction import BoxRestriction
 
 # Tutorial: https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 
@@ -16,15 +15,13 @@ class AirfoilEnv(gym.Env):
     The environment is based on the airfoiltools class from the parametrization module.
     """
 
-    _NUM_BOXES = 1
-
     metadata = {'render_modes': ["human", "no_display"], "render_fps": 2 }
 
     def __init__(self, render_mode : bool = None, max_steps : int = 50, reward_threshold : bool = None, # Environment parameters
                  n_params : int = 15, scale_actions : float = 1, airfoil_seed : np.ndarray = None, # Initial state of the environment
-                 cl_reward : bool = False, cl_reset : float = None, cl_wide : float = 8, # Cl reward parameters
+                 cl_reward : bool = False, cl_reset : float = None, cl_maxreward : float = 80, cl_wide : float = 15, # Cl reward parameters
                  delta_reward : bool = False, # Activate the delta reward
-                 efficiency_param : float = 0.5): # Efficiency weight parameter
+                 efficiency_param : float = 2): # Efficiency weight parameter
         
         """
         Initialize the environment with the following parameters:
@@ -56,6 +53,7 @@ class AirfoilEnv(gym.Env):
         else:
             self.cl_target = None # Placeholder for the cl target that will be randomly generated in the reset method
 
+        self.cl_maxreward = cl_maxreward
         self.cl_wide = cl_wide
         self.delta_reward = delta_reward
         self.efficiency_param = efficiency_param
@@ -63,7 +61,7 @@ class AirfoilEnv(gym.Env):
         self.airfoil_seed = airfoil_seed
 
         # Create the airfoil object
-        self.state = airfoiltools() 
+        self.state = AirfoilTools() 
         self.n_params = n_params # Number of parameters in one side of the airfoil
 
         # Initialize the environment state
@@ -97,9 +95,9 @@ class AirfoilEnv(gym.Env):
 
         # space is the weights of the airfoil, the leading edge weight and the cl target (if activated)
         if cl_reward == True:
-            space = 2*self.n_params + 2 + 4*self._NUM_BOXES
+            space = 2*self.n_params + 2
         else:
-            space = 2*self.n_params + 1 + 4*self._NUM_BOXES
+            space = 2*self.n_params + 1
 
         # The actions will be everytime the weights of the airfoil. Cl target is not going to be modified
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2*self.n_params+1,), dtype=np.float32)
@@ -122,29 +120,21 @@ class AirfoilEnv(gym.Env):
         if self.airfoil_seed is not None:
             self.state.kulfan(upper_weights=self.airfoil_seed[0], lower_weights=self.airfoil_seed[1], leading_edge_weight=self.airfoil_seed[2])
         else:
-            raise NotImplementedError("Due to a mistake, it is necessary to implement the airfoil_seed parameter in the reset method. random kulfan needs an airfoil declaration first")
             self.state.random_kulfan2(n_params= self.n_params)
-
-        self.state.boxes = [] # Reset the boxes
-        self.state.get_boxes(BoxRestriction.random_box(y_simmetrical=False, ymin=-0.05, ymax=0.10, widthmax=0.55, heightmax=0.08))
 
         self.done = False
         self.step_counter = 0
 
         if self.cl_reward == True and self.cl_reset is None:
-            self.cl_target = random.uniform(0.1, 1.2)
+            self.cl_target = random.uniform(0.1, 1.1)
 
 
         upper, lower, le = self.state.get_weights()
 
-        if len(self.state.boxes) != self._NUM_BOXES:
-            raise NotImplementedError("For now, the number of boxes is fixed to 1")
-
         if self.cl_reward == True:
-            observation = np.array(upper + lower + le + [self.cl_target] + self.state.return_boxes()[0], dtype=np.float32)
-
+            observation = np.array(upper + lower + le + [self.cl_target], dtype=np.float32)
         else:
-            observation = np.array(upper + lower + le + self.state.return_boxes()[0], dtype=np.float32)
+            observation = np.array(upper + lower + le, dtype=np.float32)
 
 
         """observation = {
@@ -186,7 +176,8 @@ class AirfoilEnv(gym.Env):
                                 last_efficiency=self.last_efficiency,
                                 cl_reward=self.cl_reward,
                                 cl=self.state.get_cl(),
-                                cl_target=self.cl_target,  
+                                cl_target=self.cl_target, 
+                                cl_maxreward=self.cl_maxreward, 
                                 cl_wide=self.cl_wide, 
                                 delta_reward=self.delta_reward)
             # Since last efficiency is going to be updated, the last efficiency output is saved
@@ -207,14 +198,10 @@ class AirfoilEnv(gym.Env):
         upper, lower, le = self.state.get_weights()
         
 
-        if len(self.state.boxes) != self._NUM_BOXES:
-            raise NotImplementedError("For now, the number of boxes is fixed to 1")
-
         if self.cl_reward == True:
-            observation = np.array(upper + lower + le + [self.cl_target] + self.state.return_boxes()[0], dtype=np.float32)
-
+            observation = np.array(upper + lower + le + [self.cl_target], dtype=np.float32)
         else:
-            observation = np.array(upper + lower + le + self.state.return_boxes()[0], dtype=np.float32)
+            observation = np.array(upper + lower + le, dtype=np.float32)
 
         #self.state.airfoil_plot() # Plot the airfoil
 
