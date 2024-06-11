@@ -111,7 +111,7 @@ class AirfoilTools:
 
     # Randomize the airfoil with a different method. This methods parts from the upper and lower weights and randomizes them separately
     # Randomize the weights of the airfoil   
-    def random_kulfan2(self, variation: float = 0.5, extra_weight: float = 0.5, intra_weight: float = 0.2) -> None: 
+    def random_kulfan2(self, variation: float = 0.2, extra_weight: float = 0.25, intra_weight: float = 0.25) -> None: 
         """
         Another method to randomize the weights of the airfoil with the Kulfan parameterization. 
         This method randomizes the weights separately.
