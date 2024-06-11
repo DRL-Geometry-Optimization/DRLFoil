@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream:logmodels/110624/110624_EstudioPesos_12/logs/log_110624_EstudioPesos_12.txt
 Log created at 2024-06-11 19:27:37.985779
+=======
+Log created at 2024-06-11 21:35:40.121095
+>>>>>>> Stashed changes:logmodels/110624/110624_EstudioPesos_12_128neuronas/logs/log_110624_EstudioPesos_12_128neuronas.txt
 
 
 n_params : 12
@@ -12,7 +16,7 @@ cl_reset : None
 efficiency_param : 1
 cl_wide : 20
 num_cpu : 48
-net_arch : [64, 64]
+net_arch : [128, 128]
 total_timesteps : 3000000
 gamma : 0.995
 learning_rate : 0.000268
