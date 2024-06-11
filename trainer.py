@@ -24,7 +24,7 @@ today = date.today()
 formatted_date = today.strftime("%d%m%y")
 
 ############################### MODEL NAME ########################################
-name = "borrar"
+name = "EstudioPesos_8"
 ############################### MODEL NAME ########################################
 
    
@@ -46,16 +46,16 @@ num_cpu = 48  # Number of processes to use
 test_num_cpu = 1
 env_id = 'AirfoilEnv-v0'
 
-net_arch = [256, 256, 256]
+net_arch = [64, 64]
 activation_fn = nn.Tanh
-total_timesteps = 3500000
+total_timesteps = 3000000
 
 n_boxes = 1
 reynolds = None
 
 gamma = 0.995
 learning_rate = 0.000268
-ent_coef = 0.0
+ent_coef = 0.001
 batch_size = 512
 clip_range = 0.3
 gae_lambda = 0.98
