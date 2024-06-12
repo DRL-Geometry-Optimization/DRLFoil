@@ -1,10 +1,10 @@
-Log created at 2024-06-12 03:33:49.036919
+Log created at 2024-06-11 21:34:21.824896
 
 
 n_params : 8
 max_steps : 10
-scale_actions : 0.3
-airfoil_seed : [array([0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]), array([-0.3, -0.3, -0.3, -0.3, -0.3, -0.3, -0.3, -0.3]), 0.0]
+scale_actions : 0.15
+airfoil_seed : [array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]), array([-0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1]), 0.0]
 delta_reward : False
 cl_reward : True
 cl_reset : None
