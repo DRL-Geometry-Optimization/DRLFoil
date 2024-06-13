@@ -1,4 +1,4 @@
-Log created at 2024-06-12 15:47:45.618443
+Log created at 2024-06-12 16:08:54.191564
 
 
 n_params : 8
@@ -11,8 +11,8 @@ cl_reset : None
 efficiency_param : 1
 cl_wide : 20
 num_cpu : 48
-net_arch : [256, 256]
-total_timesteps : 5000000
+net_arch : [128, 128]
+total_timesteps : 4000000
 gamma : 0.995
 learning_rate : 0.000268
 ent_coef : 0.001
