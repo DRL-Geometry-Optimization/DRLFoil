@@ -9,8 +9,9 @@ The key features of DRLFoil are:
   
 - ***High Flexibility with Constraints***: The models are trained to accommodate box constraints, cl targets, and a wide range of Reynolds numbers.
 
-## Current Status
-*DRLFoil is currently under development, as is the documentation. If you would like to contribute to its development, please contact me or submit a pull request. The first release is coming soon!*
+>[!NOTE]
+> The project has been archived as I am currently involved in other projects related to AI and Reinforcement Learning, though of a different nature. I would love to continue with DRLFoil and take it into the 3D domain, which was the original goal, but I believe there are already incredible people working on these things, and other challenges excite me more.
+> For me, DRLFoil was my introduction to software projects (and it came before AI agents, for which I am very grateful) and it has led me to research what I research today. If anyone feels inspired by this work or would like to know more about any aspect of this project, please do not hesitate to reach out, as nothing would make me happier than seeing DRLFoil contribute something to someone.
 
 ## Overview
 DRLFoil works with three main libraries:
